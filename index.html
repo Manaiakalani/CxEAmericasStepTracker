@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CxE Americas Offsite - Step Tracker</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-walking"></i>
+                        <h1>CxE Americas</h1>
+                    </div>
+                    <div class="header-stats">
+                        <div class="weather-info" id="weatherInfo">
+                            <div class="weather-location">Redmond, WA</div>
+                            <div class="weather-temp" id="weatherTemp">--°C / --°F</div>
+                            <div class="weather-advice" id="weatherAdvice">Loading...</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Steps</span>
+                            <span class="stat-value" id="totalSteps">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="container">
+                <div class="nav-buttons">
+                    <button class="nav-btn active" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button class="nav-btn" data-tab="leaderboard">
+                        <i class="fas fa-trophy"></i>
+                        <span>Leaderboard</span>
+                    </button>
+                    <button class="nav-btn" data-tab="teams">
+                        <i class="fas fa-users"></i>
+                        <span>Teams</span>
+                    </button>
+                    <button class="nav-btn" data-tab="profile">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Welcome Screen -->
+                <div id="welcomeScreen" class="welcome-screen">
+                    <div class="welcome-content">
+                        <div class="welcome-icon">
+                            <i class="fas fa-walking"></i>
+                        </div>
+                        <h2>Welcome to CxE Americas Offsite!</h2>
+                        <p>Track your daily steps and compete with your colleagues during our CxE Americas offsite week.</p>
+                        
+                        <form id="registerForm" class="register-form">
+                            <div class="form-group">
+                                <label for="userName">Your Name</label>
+                                <input type="text" id="userName" required placeholder="Enter your full name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="userTeam">Select Your Team</label>
+                                <select id="userTeam" required>
+                                    <option value="">Choose a team...</option>
+                                    <option value="Azure Champions">Azure Champions</option>
+                                    <option value="Microsoft 365 Mavericks">Microsoft 365 Mavericks</option>
+                                    <option value="Surface Squad">Surface Squad</option>
+                                    <option value="Power Platform Pioneers">Power Platform Pioneers</option>
+                                    <option value="Teams Titans">Teams Titans</option>
+                                    <option value="Dynamics Dynamos">Dynamics Dynamos</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="dailyGoal">Daily Step Goal</label>
+                                <select id="dailyGoal">
+                                    <option value="5000">5,000 steps (Light)</option>
+                                    <option value="8000" selected>8,000 steps (Moderate)</option>
+                                    <option value="10000">10,000 steps (Active)</option>
+                                    <option value="12000">12,000 steps (Champion)</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-rocket"></i>
+                                Get Started!
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Dashboard Tab -->
+                <div id="dashboardTab" class="tab-content">
+                    <div class="dashboard-header">
+                        <h2>Hello, <span id="userDisplayName">User</span>!</h2>
+                        <p class="dashboard-subtitle">Let's make today count with every step!</p>
+                    </div>
+
+                    <!-- Quick Add Steps -->
+                    <div class="quick-add-card">
+                        <h3>Add Today's Steps</h3>
+                        <div class="step-input-container">
+                            <input type="number" id="stepsInput" placeholder="Enter steps" min="0" max="50000">
+                            <button id="addStepsBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Add Steps
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Today's Progress -->
+                    <div class="progress-card">
+                        <div class="progress-header">
+                            <h3>Today's Progress</h3>
+                            <span class="date" id="currentDate"></span>
+                        </div>
+                        <div class="progress-circle-container">
+                            <div class="progress-circle">
+                                <svg width="120" height="120">
+                                    <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                    <circle cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="8" 
+                                            stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" 
+                                            id="progressCircle" transform="rotate(-90 60 60)"/>
+                                </svg>
+                                <div class="progress-text">
+                                    <div class="progress-steps" id="todaySteps">0</div>
+                                    <div class="progress-label">steps</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="progress-details">
+                            <div class="progress-item">
+                                <span class="progress-label">Goal</span>
+                                <span class="progress-value" id="dailyGoalDisplay">8,000</span>
+                            </div>
+                            <div class="progress-item">
+                                <span class="progress-label">Remaining</span>
+                                <span class="progress-value" id="remainingSteps">8,000</span>
+                            </div>
+                            <div class="progress-item">
+                                <span class="progress-label">Progress</span>
+                                <span class="progress-value" id="progressPercentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Challenges -->
+                    <div class="challenges-card">
+                        <h3>Active Challenges</h3>
+                        <div class="challenges-container" id="challengesContainer">
+                            <!-- Challenges will be generated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Weekly Overview -->
+                    <div class="weekly-card">
+                        <h3>This Week</h3>
+                        <div class="weekly-chart" id="weeklyChart">
+                            <!-- Weekly bars will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Tab -->
+                <div id="leaderboardTab" class="tab-content" style="display: none;">
+                    <div class="leaderboard-header">
+                        <h2>Leaderboard</h2>
+                        <div class="leaderboard-tabs">
+                            <button class="leaderboard-tab-btn active" data-period="today">Today</button>
+                            <button class="leaderboard-tab-btn" data-period="week">This Week</button>
+                            <button class="leaderboard-tab-btn" data-period="total">All Time</button>
+                        </div>
+                    </div>
+                    
+                    <div class="leaderboard-container">
+                        <div id="leaderboardList" class="leaderboard-list">
+                            <!-- Leaderboard items will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teams Tab -->
+                <div id="teamsTab" class="tab-content" style="display: none;">
+                    <div class="teams-header">
+                        <h2>Team Competition</h2>
+                        <p>See how your team stacks up against the competition!</p>
+                    </div>
+                    
+                    <div class="team-stats-container">
+                        <div id="teamLeaderboard" class="team-leaderboard">
+                            <!-- Team leaderboard will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="profileTab" class="tab-content" style="display: none;">
+                    <div class="profile-header">
+                        <h2>Your Profile</h2>
+                    </div>
+                    
+                    <div class="profile-card">
+                        <div class="profile-info">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="profile-details">
+                                <h3 id="profileName">User Name</h3>
+                                <p id="profileTeam">Team Name</p>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-walking"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="profileTotalSteps">0</span>
+                                    <span class="stat-label">Total Steps</span>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="profileAvgSteps">0</span>
+                                    <span class="stat-label">Daily Average</span>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="profileRank">#0</span>
+                                    <span class="stat-label">Current Rank</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-actions">
+                            <button id="editGoalBtn" class="btn btn-secondary">
+                                <i class="fas fa-edit"></i>
+                                Edit Daily Goal
+                            </button>
+                            <button id="resetDataBtn" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                                Reset Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
