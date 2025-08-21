@@ -1,0 +1,1051 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Microsoft Color Palette */
+    --ms-blue: #0078d4;
+    --ms-blue-dark: #106ebe;
+    --ms-blue-light: #40e0d0;
+    --ms-green: #107c10;
+    --ms-orange: #ff8c00;
+    --ms-red: #d13438;
+    --ms-purple: #5c2d91;
+    --ms-teal: #008272;
+    --ms-gray-50: #faf9f8;
+    --ms-gray-100: #f3f2f1;
+    --ms-gray-200: #edebe9;
+    --ms-gray-300: #e1dfdd;
+    --ms-gray-400: #d2d0ce;
+    --ms-gray-500: #b3b0ad;
+    --ms-gray-600: #8a8886;
+    --ms-gray-700: #605e5c;
+    --ms-gray-800: #3b3a39;
+    --ms-gray-900: #323130;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--ms-blue) 0%, var(--ms-purple) 100%);
+    min-height: 100vh;
+    color: var(--ms-gray-900);
+    line-height: 1.6;
+}
+
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Header Styles */
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo i {
+    font-size: 2rem;
+    color: var(--ms-blue);
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ms-blue), var(--ms-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-stats {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.weather-info {
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.weather-location {
+    font-size: 0.7rem;
+    color: var(--ms-gray-700);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.weather-temp {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ms-gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.weather-advice {
+    font-size: 0.7rem;
+    color: var(--ms-blue);
+    font-weight: 500;
+    max-width: 120px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--ms-gray-600);
+    font-weight: 500;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ms-blue);
+}
+
+/* Navigation Styles */
+.nav {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0;
+}
+
+.nav-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem;
+    background: none;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--ms-gray-600);
+    font-size: 0.875rem;
+}
+
+.nav-btn i {
+    font-size: 1.25rem;
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, var(--ms-blue), var(--ms-purple));
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 120, 212, 0.3);
+}
+
+.nav-btn:hover:not(.active) {
+    background: rgba(0, 120, 212, 0.1);
+    color: var(--ms-blue);
+}
+
+/* Main Content */
+.main {
+    flex: 1;
+    padding: 2rem 0;
+}
+
+/* Welcome Screen */
+.welcome-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+}
+
+.welcome-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+.welcome-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--ms-blue), var(--ms-purple));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.welcome-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.welcome-content h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ms-gray-900);
+}
+
+.welcome-content p {
+    color: var(--ms-gray-600);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+/* Form Styles */
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--ms-gray-800);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--ms-gray-300);
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--ms-blue);
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--ms-blue), var(--ms-purple));
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 120, 212, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 120, 212, 0.4);
+}
+
+.btn-secondary {
+    background: var(--ms-gray-100);
+    color: var(--ms-gray-800);
+    border: 2px solid var(--ms-gray-300);
+}
+
+.btn-secondary:hover {
+    background: var(--ms-gray-200);
+}
+
+.btn-danger {
+    background: var(--ms-red);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c13438;
+}
+
+/* Tab Content */
+.tab-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Dashboard Styles */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.dashboard-header h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+}
+
+.quick-add-card,
+.progress-card,
+.weekly-card,
+.challenges-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.quick-add-card h3,
+.progress-card h3,
+.weekly-card h3,
+.challenges-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--ms-gray-900);
+}
+
+.step-input-container {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.step-input-container input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--ms-gray-300);
+    border-radius: 0.75rem;
+    font-size: 1rem;
+}
+
+/* Progress Circle */
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.date {
+    color: var(--ms-gray-600);
+    font-size: 0.875rem;
+}
+
+.progress-circle-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.progress-circle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-text {
+    position: absolute;
+    text-align: center;
+}
+
+.progress-steps {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ms-gray-900);
+}
+
+.progress-label {
+    font-size: 0.75rem;
+    color: var(--ms-gray-600);
+}
+
+.progress-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    text-align: center;
+}
+
+.progress-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.progress-value {
+    font-weight: 600;
+    color: var(--ms-gray-900);
+}
+
+/* Weekly Chart */
+.weekly-chart {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 0.5rem;
+    height: 150px;
+    padding-top: 1rem;
+}
+
+.day-bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--ms-blue), var(--ms-purple));
+    border-radius: 0.5rem 0.5rem 0 0;
+    min-height: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.day-bar:hover {
+    opacity: 0.8;
+}
+
+.day-label {
+    position: absolute;
+    bottom: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--ms-gray-600);
+    font-weight: 500;
+}
+
+.day-value {
+    position: absolute;
+    top: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--ms-gray-900);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Challenges Styles */
+.challenges-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.challenge-item {
+    background: var(--ms-gray-50);
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--ms-gray-200);
+}
+
+.challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.challenge-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--ms-gray-900);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.challenge-title i {
+    color: var(--ms-blue);
+    font-size: 1.1rem;
+}
+
+.challenge-description {
+    font-size: 0.875rem;
+    color: var(--ms-gray-600);
+    margin-bottom: 0.5rem;
+}
+
+.challenge-progress-info {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ms-gray-800);
+}
+
+.challenge-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--ms-gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.challenge-progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--ms-blue), var(--ms-purple));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.challenge-fact {
+    font-size: 0.75rem;
+    color: var(--ms-gray-600);
+    font-style: italic;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ms-gray-200);
+}
+
+.challenge-completed {
+    background: linear-gradient(135deg, var(--ms-green), #20c997);
+    color: white;
+    border: 1px solid var(--ms-green);
+}
+
+.challenge-completed .challenge-title,
+.challenge-completed .challenge-description,
+.challenge-completed .challenge-progress-info,
+.challenge-completed .challenge-fact {
+    color: white;
+}
+
+.challenge-completed .challenge-progress-bar {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.challenge-completed .challenge-progress-fill {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.challenge-completed-icon {
+    color: white;
+    margin-left: auto;
+}
+
+.challenge-completed .challenge-fact {
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Leaderboard Styles */
+.leaderboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.leaderboard-header h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.leaderboard-tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    padding: 0.25rem;
+    justify-content: center;
+}
+
+.leaderboard-tab-btn {
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    border-radius: 0.75rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.leaderboard-tab-btn.active {
+    background: white;
+    color: #1f2937;
+}
+
+.leaderboard-container {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+}
+
+.leaderboard-item:hover {
+    background: #f3f4f6;
+}
+
+.leaderboard-item.current-user {
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    color: white;
+}
+
+.leaderboard-rank {
+    width: 2rem;
+    height: 2rem;
+    background: #10b981;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.leaderboard-rank.gold {
+    background: #f59e0b;
+}
+
+.leaderboard-rank.silver {
+    background: #9ca3af;
+}
+
+.leaderboard-rank.bronze {
+    background: #d97706;
+}
+
+.leaderboard-info {
+    flex: 1;
+}
+
+.leaderboard-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.leaderboard-team {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.leaderboard-item.current-user .leaderboard-team {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.leaderboard-steps {
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+/* Teams Tab */
+.teams-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.teams-header h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.teams-header p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.team-stats-container {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.team-leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.team-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+}
+
+.team-item:hover {
+    background: #f3f4f6;
+}
+
+.team-item.current-team {
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    color: white;
+}
+
+.team-rank {
+    width: 3rem;
+    height: 3rem;
+    background: #10b981;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.team-info {
+    flex: 1;
+}
+
+.team-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.team-members {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.team-item.current-team .team-members {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.team-stats {
+    text-align: right;
+}
+
+.team-steps {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.team-avg {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.team-item.current-team .team-avg {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Profile Styles */
+.profile-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.profile-header h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-avatar {
+    width: 4rem;
+    height: 4rem;
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-avatar i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.profile-details h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.profile-details p {
+    color: #6b7280;
+}
+
+.profile-stats {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 1rem;
+}
+
+.stat-icon {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon i {
+    color: white;
+    font-size: 1.125rem;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.profile-actions .btn {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+}
+
+/* Message Container */
+.message-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message {
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    color: white;
+    font-weight: 500;
+    max-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+.message.success {
+    background: #10b981;
+}
+
+.message.error {
+    background: #ef4444;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (min-width: 640px) {
+    .nav-buttons {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .nav-btn {
+        flex-direction: row;
+        justify-content: center;
+        padding: 1rem 1.5rem;
+    }
+    
+    .nav-btn span {
+        display: block;
+    }
+    
+    .profile-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .profile-actions {
+        flex-wrap: nowrap;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 0 2rem;
+    }
+    
+    .header-stats {
+        display: flex;
+    }
+    
+    .step-input-container {
+        max-width: 400px;
+        margin: 0 auto 1rem;
+    }
+    
+    .progress-details {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .challenges-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .main {
+        padding: 3rem 0;
+    }
+    
+    .tab-content {
+        gap: 2rem;
+    }
+    
+    .dashboard-header h2 {
+        font-size: 2.25rem;
+    }
+    
+    .leaderboard-header h2,
+    .teams-header h2,
+    .profile-header h2 {
+        font-size: 2.25rem;
+    }
+}
+
+/* Hide elements when not needed */
+.hidden {
+    display: none !important;
+}
+
+/* Loading animation */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2rem;
+    height: 2rem;
+    margin: -1rem 0 0 -1rem;
+    border: 2px solid transparent;
+    border-top: 2px solid #10b981;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
