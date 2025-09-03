@@ -8,6 +8,7 @@ class StepTracker {
             'CCP',
             'IDNA',
             'Management',
+            'Mike Adams',
             'Purview/CES',
             'Scale Enablement',
             'Shared Services',
@@ -71,12 +72,12 @@ class StepTracker {
                 fact: 'Master Chief (Spartan-117) first appeared in Halo: Combat Evolved in 2001, revolutionizing console gaming!'
             },
             {
-                id: 'bill-gates-bridge',
-                title: 'Bill Gates Memorial Bridge',
+                id: 'seattle-bridges',
+                title: 'Seattle Bridge Explorer',
                 description: 'Cross the equivalent of all bridges in the greater Seattle area',
                 icon: 'fas fa-road',
                 target: 14000,
-                fact: 'The Seattle area has over 400 bridges, and Bill Gates grew up just south of the city in the Eastside region!'
+                fact: 'The Seattle area has over 400 bridges connecting communities across waterways, making it one of the most bridge-dense metropolitan areas in the US!'
             }
         ];
         this.currentTab = 'dashboard';
