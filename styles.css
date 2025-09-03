@@ -701,7 +701,7 @@ body {
 .footer-text {
     text-align: center;
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: 0.875rem; /* Made smaller from 1rem */
     font-weight: 600;
     margin: 0;
     background: linear-gradient(135deg, var(--ms-blue), var(--ms-purple));
@@ -709,6 +709,63 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Rainbow heart glow effect */
+.footer-text .heart-emoji {
+    display: inline-block;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.footer-text .heart-emoji:hover {
+    animation: rainbow-glow 1.5s infinite;
+    transform: scale(1.2);
+}
+
+@keyframes rainbow-glow {
+    0% { 
+        text-shadow: 
+            0 0 5px #ff0000,
+            0 0 10px #ff0000,
+            0 0 15px #ff0000;
+    }
+    16.66% { 
+        text-shadow: 
+            0 0 5px #ff8000,
+            0 0 10px #ff8000,
+            0 0 15px #ff8000;
+    }
+    33.33% { 
+        text-shadow: 
+            0 0 5px #ffff00,
+            0 0 10px #ffff00,
+            0 0 15px #ffff00;
+    }
+    50% { 
+        text-shadow: 
+            0 0 5px #00ff00,
+            0 0 10px #00ff00,
+            0 0 15px #00ff00;
+    }
+    66.66% { 
+        text-shadow: 
+            0 0 5px #0080ff,
+            0 0 10px #0080ff,
+            0 0 15px #0080ff;
+    }
+    83.33% { 
+        text-shadow: 
+            0 0 5px #8000ff,
+            0 0 10px #8000ff,
+            0 0 15px #8000ff;
+    }
+    100% { 
+        text-shadow: 
+            0 0 5px #ff0000,
+            0 0 10px #ff0000,
+            0 0 15px #ff0000;
+    }
 }
 
 /* FAQ Modal Styles */
