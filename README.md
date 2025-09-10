@@ -7,7 +7,7 @@ A modern, enterprise-grade step tracking web application designed specifically f
 ## ✨ Features
 
 ### 🏆 **Enhanced Team Competition**
-- **9 CxE Teams**: CARE, CCP, IDNA, Management, Mike Adams, Purview/CES, Scale Enablement, Shared Services, Threat Protection
+- **9 CxE Teams**: CARE, CCP, IDNA, Management, CxE LT, Purview/CES, Scale Enablement, Shared Services, Threat Protection
 - **Advanced Overachiever System**: Multiple criteria for recognizing exceptional performance
 - **Live Notifications**: Real-time achievement alerts with animations
 - **Team Statistics**: Comprehensive analytics and rankings
@@ -135,7 +135,7 @@ Enhanced Stack:
 **🗓️ Released: September 3, 2025**
 
 #### 🆕 Recent Updates
-- ✅ **New Team Added** - "Mike Adams" team for expanded competition (9 teams total)
+- ✅ **New Team Added** - "CxE LT" team for expanded competition (9 teams total)
 - ✅ **Challenge Refinement** - Updated "Bill Gates Memorial Bridge" to "Seattle Bridge Explorer" for neutrality
 - ✅ **UI Polish** - Smaller, refined footer text sizing  
 - ✅ **Interactive Elements** - Rainbow heart glow animation on footer hover
@@ -205,7 +205,7 @@ Enhanced Stack:
 ```javascript
 // Updated team configuration in script.js (9 teams)
 this.teams = [
-    'CARE', 'CCP', 'IDNA', 'Management', 'Mike Adams',
+    'CARE', 'CCP', 'IDNA', 'Management', 'CxE LT',
     'Purview/CES', 'Scale Enablement', 
     'Shared Services', 'Threat Protection'
 ];
