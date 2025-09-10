@@ -195,15 +195,14 @@ body {
 .hamburger-flyout {
     position: fixed;
     top: 0;
-    right: -250px;
-    width: 250px;
+    right: -300px;
+    width: 300px;
     height: 100vh;
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
     border-left: 1px solid var(--border-color);
     z-index: 1001;
     transition: right 0.3s ease;
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .hamburger-flyout.open {
@@ -211,36 +210,79 @@ body {
 }
 
 .flyout-content {
-    padding: 1.5rem;
     height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+/* Weather Widget at Top */
+.flyout-weather {
+    background: linear-gradient(135deg, var(--ms-blue) 0%, var(--ms-purple) 100%);
+    color: white;
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.weather-location {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.weather-temp {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.weather-advice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.weather-advice i {
+    font-size: 1rem;
+    color: #fbbf24;
 }
 
 .flyout-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
 }
 
 .flyout-header h3 {
     color: var(--text-primary);
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 600;
+    margin: 0;
 }
 
 .close-flyout {
     background: none;
     border: none;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 0.25rem;
+    padding: 0.5rem;
     border-radius: 50%;
     transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .close-flyout:hover {
@@ -249,34 +291,45 @@ body {
 }
 
 .flyout-menu {
+    flex: 1;
+    padding: 1rem 0;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
 }
 
 .flyout-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
     background: none;
     border: none;
-    border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.2s ease;
     color: var(--text-primary);
-    font-size: 0.875rem;
+    font-size: 1rem;
     text-align: left;
+    border-bottom: 1px solid transparent;
 }
 
 .flyout-item:hover {
     background: var(--bg-hover);
+    border-bottom-color: var(--border-color);
 }
 
 .flyout-item i {
-    width: 1rem;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--ms-blue);
-    font-size: 0.875rem;
+    font-size: 1rem;
+}
+
+.flyout-item span {
+    flex: 1;
+    font-weight: 500;
 }
 
 .flyout-content {
