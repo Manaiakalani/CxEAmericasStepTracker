@@ -201,10 +201,20 @@ body {
     background: white;
     border-left: 1px solid #e5e7eb;
     z-index: 1001;
-    transition: right 0.3s ease, visibility 0.3s ease, opacity 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
     visibility: hidden;
     opacity: 0;
+    transform: translateX(100%);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 480px) {
+    .hamburger-flyout {
+        width: 280px;
+        right: -280px;
+    }
 }
 
 [data-theme="dark"] .hamburger-flyout {
@@ -216,29 +226,40 @@ body {
     right: 0;
     visibility: visible;
     opacity: 1;
+    transform: translateX(0);
 }
 
 .flyout-content {
     height: 100%;
     display: flex;
     flex-direction: column;
+    padding: 0;
 }
 
 .flyout-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
+    padding: 1rem 1.5rem;
     border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    min-height: 60px;
+}
+
+@media (max-width: 480px) {
+    .flyout-header {
+        padding: 1rem;
+    }
 }
 
 [data-theme="dark"] .flyout-header {
     border-bottom-color: var(--border-color);
+    background: var(--bg-input);
 }
 
 .flyout-header h3 {
     color: #111827;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
     margin: 0;
 }
@@ -250,45 +271,64 @@ body {
 .close-flyout {
     background: none;
     border: none;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     color: #6b7280;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 50%;
     transition: all 0.2s ease;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Accessibility improvements */
+    outline: none;
+}
+
+.close-flyout:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 
 .close-flyout:hover {
-    background: #f3f4f6;
+    background: #e5e7eb;
     color: #374151;
+    transform: scale(1.05);
+}
+
+.close-flyout:focus {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.close-flyout:active {
+    transform: scale(0.95);
 }
 
 [data-theme="dark"] .close-flyout {
     color: var(--text-secondary);
 }
 
-[data-theme="dark"] .close-flyout:hover {
+[data-theme="dark"] .close-flyout:hover,
+[data-theme="dark"] .close-flyout:focus {
     background: var(--bg-hover);
     color: var(--text-primary);
 }
 
 .flyout-menu {
     flex: 1;
-    padding: 0;
+    padding: 0.5rem 0;
     display: flex;
     flex-direction: column;
+    gap: 0;
 }
 
 .flyout-item {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.5rem;
     background: none;
     border: none;
     cursor: pointer;
@@ -297,10 +337,35 @@ body {
     font-size: 1rem;
     text-align: left;
     border-bottom: 1px solid #f3f4f6;
+    min-height: 56px;
+    /* Accessibility improvements */
+    outline: none;
+    position: relative;
+}
+
+.flyout-item:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: -2px;
+    background: #f9fafb;
 }
 
 .flyout-item:hover {
     background: #f9fafb;
+    color: #1f2937;
+    transform: translateX(4px);
+}
+
+.flyout-item:active {
+    background: #f3f4f6;
+    transform: translateX(2px);
+}
+
+@media (max-width: 480px) {
+    .flyout-item {
+        padding: 1rem;
+        font-size: 0.95rem;
+        min-height: 52px;
+    }
 }
 
 [data-theme="dark"] .flyout-item {
@@ -308,8 +373,14 @@ body {
     border-bottom-color: var(--border-color);
 }
 
-[data-theme="dark"] .flyout-item:hover {
+[data-theme="dark"] .flyout-item:hover,
+[data-theme="dark"] .flyout-item:focus-visible {
     background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .flyout-item:active {
+    background: var(--bg-input);
 }
 
 .flyout-item i {
@@ -325,6 +396,32 @@ body {
 .flyout-item span {
     flex: 1;
     font-weight: 500;
+}
+
+/* Backdrop for mobile accessibility */
+.hamburger-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.hamburger-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (min-width: 768px) {
+    .hamburger-backdrop {
+        background: rgba(0, 0, 0, 0.1);
+    }
 }
 
 .flyout-content {
