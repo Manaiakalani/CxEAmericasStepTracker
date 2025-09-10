@@ -191,28 +191,92 @@ body {
 }
 
 /* Hamburger Flyout */
+/* Hamburger Flyout */
 .hamburger-flyout {
     position: fixed;
     top: 0;
-    right: -300px; /* Increased to ensure it's completely hidden */
-    width: 280px;
+    right: -250px;
+    width: 250px;
     height: 100vh;
     background: var(--bg-card);
     backdrop-filter: blur(20px);
     border-left: 1px solid var(--border-color);
     z-index: 1001;
-    transition: right var(--transition-normal);
+    transition: right 0.3s ease;
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-    transform: translateZ(0); /* Force GPU acceleration */
-    will-change: transform; /* Optimize for animations */
-    visibility: hidden; /* Additional hiding mechanism */
-    opacity: 0; /* Fade effect */
 }
 
 .hamburger-flyout.open {
     right: 0;
-    visibility: visible;
-    opacity: 1;
+}
+
+.flyout-content {
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.flyout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.flyout-header h3 {
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.close-flyout {
+    background: none;
+    border: none;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-flyout:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.flyout-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.flyout-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.flyout-item:hover {
+    background: var(--bg-hover);
+}
+
+.flyout-item i {
+    width: 1rem;
+    color: var(--ms-blue);
+    font-size: 0.875rem;
 }
 
 .flyout-content {
