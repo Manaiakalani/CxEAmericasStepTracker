@@ -8,7 +8,7 @@ class StepTracker {
             'CCP',
             'IDNA',
             'Management',
-            'Mike Adams',
+            'CxE LT',
             'Purview/CES',
             'Scale Enablement',
             'Shared Services',
@@ -133,35 +133,41 @@ class StepTracker {
         const startTime = performance.now();
         
         try {
+            // Critical path - load immediately
             this.loadCurrentUser();
-            this.setupEventListeners();
-            this.updateUI();
-            this.loadWeather();
             this.initDarkMode();
-            this.initDynamicContent();
             
+            // Setup event listeners early
+            this.setupEventListeners();
+            
+            // Defer non-critical initialization
+            requestIdleCallback(() => {
+                this.loadWeather();
+                this.initDynamicContent();
+                this.checkStorageQuota();
+                this.trackPerformanceMetrics();
+            });
+            
+            // Update UI based on user state
             if (!this.currentUser) {
                 this.showWelcomeScreen();
             } else {
                 this.hideWelcomeScreen();
-                this.updateDashboard();
-                this.updateLeaderboard();
-                this.updateTeamStats();
-                this.updateProfile();
+                // Batch DOM updates for better performance
+                this.batchDOMUpdates([
+                    () => this.updateDashboard(),
+                    () => this.updateLeaderboard(),
+                    () => this.updateTeamStats(),
+                    () => this.updateProfile()
+                ]);
             }
 
             // Performance monitoring
             const endTime = performance.now();
             console.log(`App initialization completed in ${Math.round(endTime - startTime)}ms`);
             
-            // Check for localStorage quota issues
-            this.checkStorageQuota();
-            
-            // Track performance metrics
-            this.trackPerformanceMetrics();
-            
         } catch (error) {
-            console.error('Failed to initialize app:', error);
+            this.handleError(error, 'init');
             this.showMessage('Failed to load the application. Please refresh the page.', 'error');
         }
     }
@@ -260,35 +266,108 @@ class StepTracker {
         }
     }
 
-    // Global error handler
+    // Enhanced global error handler with retry logic
     handleError(error, context = 'Unknown') {
         console.error(`Error in ${context}:`, error);
         
-        // Log error details
+        // Log error details with enhanced information
         const errorDetails = {
             message: error.message,
             stack: error.stack,
             context: context,
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
-            url: window.location.href
+            url: window.location.href,
+            memoryUsage: this.getMemoryUsage(),
+            storageQuota: this.getStorageQuota()
         };
         
         // Store error for debugging (limit to last 10 errors)
-        const errors = JSON.parse(localStorage.getItem('stepTrackerErrors') || '[]');
-        errors.unshift(errorDetails);
-        if (errors.length > 10) {
-            errors.splice(10);
-        }
-        
         try {
+            const errors = JSON.parse(localStorage.getItem('stepTrackerErrors') || '[]');
+            errors.unshift(errorDetails);
+            if (errors.length > 10) {
+                errors.splice(10);
+            }
             localStorage.setItem('stepTrackerErrors', JSON.stringify(errors));
         } catch (storageError) {
             console.error('Could not save error log:', storageError);
+            // If we can't save errors, at least log them
+            console.warn('Error storage failed, logging to console only');
         }
         
-        // Show user-friendly error message
-        this.showMessage('An error occurred. The issue has been logged.', 'error');
+        // Implement retry logic for certain operations
+        if (this.shouldRetry(context, error)) {
+            this.retryOperation(context, error);
+        } else {
+            // Show user-friendly error message
+            this.showMessage(this.getErrorMessage(error, context), 'error');
+        }
+    }
+
+    // New helper methods for enhanced error handling
+    getMemoryUsage() {
+        if ('memory' in performance) {
+            return {
+                used: Math.round(performance.memory.usedJSHeapSize / 1048576),
+                total: Math.round(performance.memory.totalJSHeapSize / 1048576),
+                limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576)
+            };
+        }
+        return null;
+    }
+
+    getStorageQuota() {
+        try {
+            const used = JSON.stringify(localStorage).length;
+            return {
+                used: Math.round(used / 1024),
+                usedMB: Math.round(used / 1048576 * 100) / 100
+            };
+        } catch (error) {
+            return null;
+        }
+    }
+
+    shouldRetry(context, error) {
+        const retryableContexts = ['loadWeather', 'saveData'];
+        const retryableErrors = ['NetworkError', 'TimeoutError'];
+        
+        return retryableContexts.includes(context) || 
+               retryableErrors.some(type => error.message.includes(type));
+    }
+
+    retryOperation(context, error) {
+        const retryCount = this.retryCount || {};
+        retryCount[context] = (retryCount[context] || 0) + 1;
+        this.retryCount = retryCount;
+        
+        if (retryCount[context] <= 3) {
+            const delay = Math.pow(2, retryCount[context]) * 1000; // Exponential backoff
+            console.log(`Retrying ${context} in ${delay}ms (attempt ${retryCount[context]})`);
+            
+            setTimeout(() => {
+                if (context === 'loadWeather') {
+                    this.loadWeather();
+                } else if (context === 'saveData') {
+                    this.saveData();
+                }
+            }, delay);
+        } else {
+            this.showMessage(`Operation ${context} failed after multiple attempts.`, 'error');
+            retryCount[context] = 0; // Reset for future attempts
+        }
+    }
+
+    getErrorMessage(error, context) {
+        const friendlyMessages = {
+            'loadWeather': 'Weather data temporarily unavailable.',
+            'saveData': 'Unable to save your data. Please try again.',
+            'updateUI': 'Display update failed. Please refresh the page.',
+            'addSteps': 'Failed to add steps. Please try again.'
+        };
+        
+        return friendlyMessages[context] || 'An unexpected error occurred. The issue has been logged.';
     }
 
     // Get error logs for debugging
@@ -907,14 +986,6 @@ class StepTracker {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 
-    // Performance optimization: DOM element caching
-    getElement(id) {
-        if (!this.domCache[id]) {
-            this.domCache[id] = document.getElementById(id);
-        }
-        return this.domCache[id];
-    }
-
     // Debounced function execution to prevent excessive calls
     debounce(func, delay, key) {
         return (...args) => {
@@ -923,11 +994,117 @@ class StepTracker {
         };
     }
 
-    // Optimized batch DOM updates
-    batchDOMUpdates(updates) {
-        requestAnimationFrame(() => {
-            updates.forEach(update => update());
+    // Enhanced DOM element caching with automatic cleanup
+    getElement(id) {
+        if (!this.domCache[id]) {
+            this.domCache[id] = document.getElementById(id);
+            
+            // Set up mutation observer to clear cache if element is removed
+            if (this.domCache[id] && 'MutationObserver' in window) {
+                this.setupElementCacheCleanup(id);
+            }
+        }
+        return this.domCache[id];
+    }
+
+    // New method for cache cleanup
+    setupElementCacheCleanup(id) {
+        if (!this.mutationObserver) {
+            this.mutationObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.removedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                this.cleanupCacheForRemovedNode(node);
+                            }
+                        });
+                    }
+                });
+            });
+            
+            this.mutationObserver.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+    }
+
+    cleanupCacheForRemovedNode(node) {
+        Object.keys(this.domCache).forEach(cachedId => {
+            const cachedElement = this.domCache[cachedId];
+            if (cachedElement && (cachedElement === node || node.contains(cachedElement))) {
+                delete this.domCache[cachedId];
+            }
         });
+    }
+
+    // Enhanced batch DOM updates with virtual DOM-like approach
+    batchDOMUpdates(updates) {
+        // Use DocumentFragment for better performance
+        const fragment = document.createDocumentFragment();
+        let batchedUpdates = [];
+        
+        // Separate DOM reads from writes
+        const reads = updates.filter(update => update.type === 'read');
+        const writes = updates.filter(update => update.type === 'write' || !update.type);
+        
+        requestAnimationFrame(() => {
+            // Perform all reads first
+            reads.forEach(update => update.fn());
+            
+            // Then perform all writes
+            writes.forEach(update => {
+                if (typeof update === 'function') {
+                    update();
+                } else {
+                    update.fn();
+                }
+            });
+        });
+    }
+
+    // New method for efficient DOM manipulation
+    updateMultipleElements(updates) {
+        const startTime = performance.now();
+        
+        // Group updates by parent element for better performance
+        const updatesByParent = new Map();
+        
+        Object.entries(updates).forEach(([id, content]) => {
+            const element = this.getElement(id);
+            if (element) {
+                const parent = element.parentElement;
+                if (!updatesByParent.has(parent)) {
+                    updatesByParent.set(parent, []);
+                }
+                updatesByParent.get(parent).push({ element, content });
+            }
+        });
+        
+        // Apply updates parent by parent
+        updatesByParent.forEach((elementUpdates, parent) => {
+            // Temporarily hide parent to prevent reflows
+            const originalDisplay = parent.style.display;
+            parent.style.display = 'none';
+            
+            elementUpdates.forEach(({ element, content }) => {
+                if (typeof content === 'string') {
+                    element.textContent = content;
+                } else if (content.html) {
+                    element.innerHTML = content.html;
+                } else if (content.value !== undefined) {
+                    element.value = content.value;
+                }
+            });
+            
+            // Restore visibility
+            parent.style.display = originalDisplay;
+        });
+        
+        const endTime = performance.now();
+        if (endTime - startTime > 16) { // More than one frame
+            console.warn(`DOM update took ${Math.round(endTime - startTime)}ms`);
+        }
     }
 
     // Intersection Observer for lazy loading
@@ -992,6 +1169,21 @@ class StepTracker {
 
     formatNumber(num) {
         return num.toLocaleString();
+    }
+
+    // Performance monitoring utility
+    measurePerformance(name, fn) {
+        return (...args) => {
+            const start = performance.now();
+            const result = fn.apply(this, args);
+            const end = performance.now();
+            
+            if (end - start > 16) { // More than one frame
+                console.warn(`${name} took ${Math.round(end - start)}ms`);
+            }
+            
+            return result;
+        };
     }
 
     async loadWeather() {
@@ -1218,18 +1410,107 @@ class StepTracker {
     }
 
     saveData() {
-        // Debounced save to prevent excessive localStorage writes
+        // Optimized debounced save with memory cleanup
         this.debouncedSave = this.debouncedSave || this.debounce(() => {
             try {
-                localStorage.setItem('stepTrackerUsers', JSON.stringify(this.users));
-                localStorage.setItem('stepTrackerActivities', JSON.stringify(this.recentActivities));
+                // Cleanup old data before saving
+                this.cleanupOldData();
+                
+                const usersData = JSON.stringify(this.users);
+                const activitiesData = JSON.stringify(this.recentActivities);
+                
+                // Check data size before saving
+                const totalSize = usersData.length + activitiesData.length;
+                if (totalSize > 4 * 1024 * 1024) { // 4MB warning
+                    console.warn('Large data size detected, consider cleanup');
+                    this.performDataCleanup();
+                }
+                
+                localStorage.setItem('stepTrackerUsers', usersData);
+                localStorage.setItem('stepTrackerActivities', activitiesData);
+                
             } catch (error) {
                 console.error('Failed to save data to localStorage:', error);
-                this.showMessage('Failed to save data. Storage may be full.', 'error');
+                if (error.name === 'QuotaExceededError') {
+                    this.handleStorageQuotaExceeded();
+                } else {
+                    this.showMessage('Failed to save data. Storage may be full.', 'error');
+                }
             }
         }, 500, 'save');
         
         this.debouncedSave();
+    }
+
+    // New method for data cleanup
+    cleanupOldData() {
+        // Remove step data older than 30 days
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 30);
+        const cutoffString = cutoffDate.toISOString().split('T')[0];
+        
+        this.users.forEach(user => {
+            if (user.steps) {
+                Object.keys(user.steps).forEach(date => {
+                    if (date < cutoffString) {
+                        delete user.steps[date];
+                    }
+                });
+            }
+        });
+        
+        // Limit recent activities to 50 items
+        if (this.recentActivities.length > 50) {
+            this.recentActivities = this.recentActivities.slice(0, 50);
+        }
+    }
+
+    // New method for handling storage quota exceeded
+    handleStorageQuotaExceeded() {
+        this.showMessage('Storage is full. Cleaning up old data...', 'warning');
+        this.performDataCleanup();
+        
+        // Try saving again after cleanup
+        setTimeout(() => {
+            try {
+                localStorage.setItem('stepTrackerUsers', JSON.stringify(this.users));
+                localStorage.setItem('stepTrackerActivities', JSON.stringify(this.recentActivities));
+                this.showMessage('Data saved after cleanup.', 'success');
+            } catch (error) {
+                this.showMessage('Unable to save data. Please manually clear some browser data.', 'error');
+            }
+        }, 1000);
+    }
+
+    // Enhanced data cleanup
+    performDataCleanup() {
+        // Keep only last 14 days of step data
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 14);
+        const cutoffString = cutoffDate.toISOString().split('T')[0];
+        
+        this.users.forEach(user => {
+            if (user.steps) {
+                const newSteps = {};
+                let totalSteps = 0;
+                
+                Object.keys(user.steps).forEach(date => {
+                    if (date >= cutoffString) {
+                        newSteps[date] = user.steps[date];
+                        totalSteps += user.steps[date];
+                    }
+                });
+                
+                user.steps = newSteps;
+                user.totalSteps = totalSteps;
+            }
+        });
+        
+        // Keep only last 20 activities
+        this.recentActivities = this.recentActivities.slice(0, 20);
+        
+        // Clear error logs to free space
+        this.clearErrorLogs();
     }
 
     // Dynamic Content Initialization
