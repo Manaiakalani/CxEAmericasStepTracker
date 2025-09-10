@@ -201,8 +201,10 @@ body {
     background: white;
     border-left: 1px solid #e5e7eb;
     z-index: 1001;
-    transition: right 0.3s ease;
+    transition: right 0.3s ease, visibility 0.3s ease, opacity 0.3s ease;
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    visibility: hidden;
+    opacity: 0;
 }
 
 [data-theme="dark"] .hamburger-flyout {
@@ -212,6 +214,8 @@ body {
 
 .hamburger-flyout.open {
     right: 0;
+    visibility: visible;
+    opacity: 1;
 }
 
 .flyout-content {
