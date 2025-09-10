@@ -449,6 +449,21 @@ class StepTracker {
             this.closeHamburgerMenu();
         });
 
+        // Backdrop click to close
+        document.getElementById('hamburgerBackdrop').addEventListener('click', () => {
+            this.closeHamburgerMenu();
+        });
+
+        // Keyboard support for menu
+        document.addEventListener('keydown', (e) => {
+            const flyout = document.getElementById('hamburgerFlyout');
+            if (flyout.classList.contains('open')) {
+                if (e.key === 'Escape') {
+                    this.closeHamburgerMenu();
+                }
+            }
+        });
+
         document.getElementById('toggleDarkModeMenu').addEventListener('click', () => {
             this.toggleDarkMode();
         });
@@ -1825,12 +1840,28 @@ class StepTracker {
     // Hamburger Menu Functions
     toggleHamburgerMenu() {
         const flyout = document.getElementById('hamburgerFlyout');
-        flyout.classList.toggle('open');
+        const backdrop = document.getElementById('hamburgerBackdrop');
+        const isOpen = flyout.classList.contains('open');
+        
+        if (isOpen) {
+            this.closeHamburgerMenu();
+        } else {
+            flyout.classList.add('open');
+            backdrop.classList.add('show');
+            // Focus management for accessibility
+            flyout.focus();
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     closeHamburgerMenu() {
         const flyout = document.getElementById('hamburgerFlyout');
+        const backdrop = document.getElementById('hamburgerBackdrop');
         flyout.classList.remove('open');
+        backdrop.classList.remove('show');
+        // Restore body scrolling
+        document.body.style.overflow = 'auto';
     }
 
     // FAQ Modal Functions
@@ -1897,8 +1928,12 @@ class StepTracker {
     initUI() {
         // Ensure hamburger menu starts closed
         const flyout = document.getElementById('hamburgerFlyout');
+        const backdrop = document.getElementById('hamburgerBackdrop');
         if (flyout) {
             flyout.classList.remove('open');
+        }
+        if (backdrop) {
+            backdrop.classList.remove('show');
         }
         
         // Ensure FAQ modal starts closed
