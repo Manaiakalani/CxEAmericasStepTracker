@@ -142,6 +142,7 @@ class StepTracker {
             // Critical path - load immediately
             this.loadCurrentUser();
             this.initDarkMode();
+            this.initUI();
             
             // Setup event listeners early
             this.setupEventListeners();
@@ -1890,6 +1891,24 @@ class StepTracker {
     initDarkMode() {
         const savedTheme = localStorage.getItem('stepTrackerTheme') || 'light';
         this.setTheme(savedTheme);
+    }
+
+    // Initialize UI state
+    initUI() {
+        // Ensure hamburger menu starts closed
+        const flyout = document.getElementById('hamburgerFlyout');
+        if (flyout) {
+            flyout.classList.remove('open');
+        }
+        
+        // Ensure FAQ modal starts closed
+        const modal = document.getElementById('faqModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        
+        // Ensure body overflow is normal
+        document.body.style.overflow = 'auto';
     }
 
     toggleDarkMode() {
