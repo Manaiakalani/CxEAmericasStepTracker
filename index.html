@@ -106,34 +106,38 @@
         <!-- Main Content -->
         <main class="main">
             <div class="container">
+                <!-- Hamburger Menu Backdrop -->
+                <div id="hamburgerBackdrop" class="hamburger-backdrop"></div>
+                
                 <!-- Hamburger Menu Flyout -->
-                <div id="hamburgerFlyout" class="hamburger-flyout">
+                <div id="hamburgerFlyout" class="hamburger-flyout" role="dialog" aria-modal="true" aria-labelledby="menu-title">
                     <div class="flyout-content">
                         <div class="flyout-header">
-                            <h3>Menu</h3>
-                            <button id="closeFlyout" class="close-flyout">
-                                <i class="fas fa-times"></i>
+                            <h3 id="menu-title">Menu</h3>
+                            <button id="closeFlyout" class="close-flyout" aria-label="Close menu">
+                                <i class="fas fa-times" aria-hidden="true"></i>
                             </button>
                         </div>
-                        <div class="flyout-menu">
-                            <button class="flyout-item" id="toggleDarkModeMenu">
-                                <i class="fas fa-moon" id="darkModeMenuIcon"></i>
+                        
+                        <div class="flyout-menu" role="menu">
+                            <button class="flyout-item" id="toggleDarkModeMenu" role="menuitem" aria-label="Toggle dark mode">
+                                <i class="fas fa-moon" id="darkModeMenuIcon" aria-hidden="true"></i>
                                 <span>Toggle Dark Mode</span>
                             </button>
-                            <button class="flyout-item" id="showFAQ">
-                                <i class="fas fa-question-circle"></i>
+                            <button class="flyout-item" id="showFAQ" role="menuitem" aria-label="View frequently asked questions">
+                                <i class="fas fa-question-circle" aria-hidden="true"></i>
                                 <span>FAQ & Info</span>
                             </button>
-                            <button class="flyout-item" id="fileFeedback">
-                                <i class="fas fa-bug"></i>
+                            <button class="flyout-item" id="fileFeedback" role="menuitem" aria-label="Report a bug or issue">
+                                <i class="fas fa-bug" aria-hidden="true"></i>
                                 <span>Report a Bug</span>
                             </button>
-                            <button class="flyout-item" id="fileFeature">
-                                <i class="fas fa-lightbulb"></i>
+                            <button class="flyout-item" id="fileFeature" role="menuitem" aria-label="Request a new feature">
+                                <i class="fas fa-lightbulb" aria-hidden="true"></i>
                                 <span>Request Feature</span>
                             </button>
-                            <button class="flyout-item" id="viewGitHub">
-                                <i class="fab fa-github"></i>
+                            <button class="flyout-item" id="viewGitHub" role="menuitem" aria-label="View this project on GitHub">
+                                <i class="fab fa-github" aria-hidden="true"></i>
                                 <span>View this project on GitHub</span>
                             </button>
                         </div>
@@ -160,9 +164,9 @@
                                     <option value="">Choose a team...</option>
                                     <option value="CARE">CARE</option>
                                     <option value="CCP">CCP</option>
+                                    <option value="CxE LT">CxE LT</option>
                                     <option value="IDNA">IDNA</option>
                                     <option value="Management">Management</option>
-                                    <option value="CxE LT">CxE LT</option>
                                     <option value="Purview/CES">Purview/CES</option>
                                     <option value="Scale Enablement">Scale Enablement</option>
                                     <option value="Shared Services">Shared Services</option>
@@ -356,6 +360,10 @@
                             <button id="editGoalBtn" class="btn btn-secondary">
                                 <i class="fas fa-edit"></i>
                                 Edit Daily Goal
+                            </button>
+                            <button id="changeTeamBtn" class="btn btn-secondary">
+                                <i class="fas fa-users"></i>
+                                Change Team
                             </button>
                             <button id="resetDataBtn" class="btn btn-danger">
                                 <i class="fas fa-trash"></i>
