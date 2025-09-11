@@ -1,19 +1,20 @@
 // Step Tracker Application
 class StepTracker {
     constructor() {
-        this.currentUser = null;
-        this.users = JSON.parse(localStorage.getItem('stepTrackerUsers') || '[]');
-        this.teams = [
-            'CARE',
-            'CCP',
-            'IDNA',
-            'Management',
-            'CxE LT',
-            'Purview/CES',
-            'Scale Enablement',
-            'Shared Services',
-            'Threat Protection'
-        ];
+        try {
+            this.currentUser = null;
+            this.users = JSON.parse(localStorage.getItem('stepTrackerUsers') || '[]');
+            this.teams = [
+                'CARE',
+                'CCP',
+                'CxE LT',
+                'IDNA',
+                'Management',
+                'Purview/CES',
+                'Scale Enablement',
+                'Shared Services',
+                'Threat Protection'
+            ];
         this.challenges = [
             {
                 id: 'space-needle',
@@ -127,6 +128,11 @@ class StepTracker {
         ];
         
         this.init();
+        } catch (error) {
+            console.error('Constructor initialization failed:', error);
+            // Show a basic error message if constructor fails
+            document.body.innerHTML = '<div style="text-align: center; margin: 50px; font-family: Arial;"><h2>Failed to load the application</h2><p>Please refresh the page. If the problem persists, clear your browser data.</p></div>';
+        }
     }
 
     init() {
@@ -136,17 +142,25 @@ class StepTracker {
             // Critical path - load immediately
             this.loadCurrentUser();
             this.initDarkMode();
+            this.initUI();
             
             // Setup event listeners early
             this.setupEventListeners();
             
-            // Defer non-critical initialization
-            requestIdleCallback(() => {
+            // Defer non-critical initialization with fallback
+            const deferredInit = () => {
                 this.loadWeather();
                 this.initDynamicContent();
                 this.checkStorageQuota();
                 this.trackPerformanceMetrics();
-            });
+            };
+            
+            // Use requestIdleCallback if available, otherwise setTimeout
+            if (typeof requestIdleCallback === 'function') {
+                requestIdleCallback(deferredInit);
+            } else {
+                setTimeout(deferredInit, 100);
+            }
             
             // Update UI based on user state
             if (!this.currentUser) {
@@ -418,6 +432,10 @@ class StepTracker {
             this.editDailyGoal();
         });
 
+        document.getElementById('changeTeamBtn').addEventListener('click', () => {
+            this.changeTeam();
+        });
+
         document.getElementById('resetDataBtn').addEventListener('click', () => {
             this.resetData();
         });
@@ -429,6 +447,21 @@ class StepTracker {
 
         document.getElementById('closeFlyout').addEventListener('click', () => {
             this.closeHamburgerMenu();
+        });
+
+        // Backdrop click to close
+        document.getElementById('hamburgerBackdrop').addEventListener('click', () => {
+            this.closeHamburgerMenu();
+        });
+
+        // Keyboard support for menu
+        document.addEventListener('keydown', (e) => {
+            const flyout = document.getElementById('hamburgerFlyout');
+            if (flyout.classList.contains('open')) {
+                if (e.key === 'Escape') {
+                    this.closeHamburgerMenu();
+                }
+            }
         });
 
         document.getElementById('toggleDarkModeMenu').addEventListener('click', () => {
@@ -922,18 +955,116 @@ class StepTracker {
     }
 
     editDailyGoal() {
-        const newGoal = prompt('Enter your new daily step goal:', this.currentUser.dailyGoal);
-        
-        if (newGoal !== null) {
-            const goal = parseInt(newGoal);
-            if (goal > 0 && goal <= 50000) {
-                this.currentUser.dailyGoal = goal;
+        try {
+            const currentGoal = this.currentUser.dailyGoal;
+            const newGoalInput = prompt('Enter your new daily step goal:', currentGoal);
+            
+            if (newGoalInput === null) return; // User cancelled
+            
+            const newGoal = this.validateAndSanitizeInput(newGoalInput, 'goal');
+            
+            this.currentUser.dailyGoal = newGoal;
+            this.saveData();
+            this.updateDashboard();
+            this.showMessage(`Daily goal updated to ${this.formatNumber(newGoal)} steps!`, 'success');
+            
+        } catch (error) {
+            this.handleError(error, 'editDailyGoal');
+            this.showMessage(error.message, 'error');
+        }
+    }
+
+    changeTeam() {
+        try {
+            const currentTeam = this.currentUser.team;
+            
+            // Create a select dropdown for team selection
+            const teamOptions = this.teams.map(team => 
+                `<option value="${team}" ${team === currentTeam ? 'selected' : ''}>${team}</option>`
+            ).join('');
+            
+            const selectHTML = `
+                <div style="margin: 10px 0;">
+                    <label for="newTeamSelect" style="display: block; margin-bottom: 5px; font-weight: bold;">Select your new team:</label>
+                    <select id="newTeamSelect" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">
+                        ${teamOptions}
+                    </select>
+                </div>
+            `;
+            
+            // Create a modal-like experience
+            const modalDiv = document.createElement('div');
+            modalDiv.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                background: rgba(0,0,0,0.5); z-index: 10000; 
+                display: flex; align-items: center; justify-content: center;
+            `;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.style.cssText = `
+                background: white; padding: 20px; border-radius: 8px; 
+                max-width: 400px; width: 90%; margin: 20px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            `;
+            
+            contentDiv.innerHTML = `
+                <h3 style="margin: 0 0 15px 0; color: #333;">Change Team</h3>
+                <p style="margin: 0 0 15px 0; color: #666;">Current team: <strong>${currentTeam}</strong></p>
+                ${selectHTML}
+                <div style="margin-top: 20px; text-align: right;">
+                    <button id="cancelTeamChange" style="margin-right: 10px; padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    <button id="confirmTeamChange" style="padding: 8px 16px; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">Change Team</button>
+                </div>
+            `;
+            
+            modalDiv.appendChild(contentDiv);
+            document.body.appendChild(modalDiv);
+            
+            // Handle button clicks
+            document.getElementById('cancelTeamChange').onclick = () => {
+                document.body.removeChild(modalDiv);
+            };
+            
+            document.getElementById('confirmTeamChange').onclick = () => {
+                const newTeam = document.getElementById('newTeamSelect').value;
+                
+                if (newTeam === currentTeam) {
+                    this.showMessage('You are already on that team!', 'info');
+                    document.body.removeChild(modalDiv);
+                    return;
+                }
+                
+                // Validate the team selection
+                const validatedTeam = this.validateAndSanitizeInput(newTeam, 'team');
+                
+                // Update user's team
+                this.currentUser.team = validatedTeam;
                 this.saveData();
-                this.updateDashboard();
-                this.showMessage(`Daily goal updated to ${this.formatNumber(goal)} steps!`, 'success');
-            } else {
-                this.showMessage('Please enter a valid goal (1-50,000 steps)', 'error');
-            }
+                
+                // Update UI
+                this.updateProfile();
+                this.updateTeamStats();
+                
+                // Show success message
+                this.showMessage(`Team changed from "${currentTeam}" to "${validatedTeam}"! 🎉`, 'success');
+                
+                // Add to recent activities
+                this.addRecentActivity('team-change', `${this.currentUser.name} changed teams to ${validatedTeam}`, new Date());
+                
+                // Close modal
+                document.body.removeChild(modalDiv);
+            };
+            
+            // Close modal when clicking outside
+            modalDiv.onclick = (e) => {
+                if (e.target === modalDiv) {
+                    document.body.removeChild(modalDiv);
+                }
+            };
+            
+        } catch (error) {
+            this.handleError(error, 'changeTeam');
+            this.showMessage(error.message, 'error');
         }
     }
 
@@ -1709,12 +1840,28 @@ class StepTracker {
     // Hamburger Menu Functions
     toggleHamburgerMenu() {
         const flyout = document.getElementById('hamburgerFlyout');
-        flyout.classList.toggle('open');
+        const backdrop = document.getElementById('hamburgerBackdrop');
+        const isOpen = flyout.classList.contains('open');
+        
+        if (isOpen) {
+            this.closeHamburgerMenu();
+        } else {
+            flyout.classList.add('open');
+            backdrop.classList.add('show');
+            // Focus management for accessibility
+            flyout.focus();
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     closeHamburgerMenu() {
         const flyout = document.getElementById('hamburgerFlyout');
+        const backdrop = document.getElementById('hamburgerBackdrop');
         flyout.classList.remove('open');
+        backdrop.classList.remove('show');
+        // Restore body scrolling
+        document.body.style.overflow = 'auto';
     }
 
     // FAQ Modal Functions
@@ -1775,6 +1922,28 @@ class StepTracker {
     initDarkMode() {
         const savedTheme = localStorage.getItem('stepTrackerTheme') || 'light';
         this.setTheme(savedTheme);
+    }
+
+    // Initialize UI state
+    initUI() {
+        // Ensure hamburger menu starts closed
+        const flyout = document.getElementById('hamburgerFlyout');
+        const backdrop = document.getElementById('hamburgerBackdrop');
+        if (flyout) {
+            flyout.classList.remove('open');
+        }
+        if (backdrop) {
+            backdrop.classList.remove('show');
+        }
+        
+        // Ensure FAQ modal starts closed
+        const modal = document.getElementById('faqModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        
+        // Ensure body overflow is normal
+        document.body.style.overflow = 'auto';
     }
 
     toggleDarkMode() {
