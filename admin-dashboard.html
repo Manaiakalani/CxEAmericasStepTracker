@@ -1,0 +1,2739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CxE Americas Step Tracker</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
+    <script src="supabase-config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0078d4, #5c2d91);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.98) 100%);
+            padding: 24px 32px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.08),
+                0 4px 16px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        /* Responsive Design for Header */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px 24px;
+                text-align: center;
+            }
+
+            .header-right {
+                flex-direction: column;
+                gap: 12px;
+                width: 100%;
+            }
+
+            .admin-buttons {
+                flex-direction: column;
+                width: 100%;
+                gap: 8px;
+            }
+
+            .sign-out-btn,
+            .main-app-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .user-info {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+        }
+
+        /* Enhanced action section styling */
+        .action-section {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: rgba(248, 250, 252, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+
+        .action-section h3 {
+            color: #374151;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-section:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Enhanced button styling */
+        .btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.25);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: #3b82f6;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .header h1 {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #8b5cf6 50%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .user-info::before {
+            content: '👤';
+            font-size: 16px;
+        }
+
+        .admin-buttons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sign-out-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sign-out-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .sign-out-btn:active {
+            transform: translateY(0);
+        }
+
+        .main-app-btn {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-app-btn:hover {
+            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+        }
+
+        .main-app-btn:active {
+            transform: translateY(0);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        /* Dashboard Sections */
+        .dashboard-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .dashboard-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 16px 24px;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 16px;
+        }
+
+        .section-header h2 {
+            color: #1e293b;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header p {
+            color: #64748b;
+            font-size: 14px;
+            margin: 8px 0 0 0;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.06),
+                0 3px 10px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #06d6a0 100%);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 35px rgba(0, 0, 0, 0.08),
+                0 5px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        .card h2 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card p {
+            color: #64748b;
+            margin-bottom: 24px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Special card types */
+        .card.overview-card {
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .card.management-card {
+            background: linear-gradient(135deg, #d1fae5 0%, #dcfce7 100%);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .card.debug-tools {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .card.user-management {
+            background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+            border-color: rgba(236, 72, 153, 0.2);
+        }
+
+        .btn {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 5px;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #106ebe;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #0078d4;
+            border: 1px solid #0078d4;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-outline:hover {
+            background: #0078d4;
+            color: white;
+        }
+
+        .user-management {
+            grid-column: 1 / -1;
+        }
+
+        .debug-tools {
+            grid-column: 1 / -1;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .user-table th,
+        .user-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .user-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .user-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .add-user-form {
+            display: none;
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            color: #6b7280;
+            padding: 20px;
+        }
+
+        .action-section {
+            margin-bottom: 20px;
+        }
+
+        .action-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin: 15px 0 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body style="display: none;">
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Admin Dashboard</h1>
+            <div class="header-right">
+                <div class="user-info">Admin: cxeadmin</div>
+                <div class="admin-buttons">
+                    <button class="main-app-btn" onclick="goHome()">🏠 Main App</button>
+                    <button class="sign-out-btn" onclick="adminLogout()">🚪 Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div class="section-header">
+            <h2>📊 System Overview</h2>
+            <p>Real-time statistics and system health monitoring</p>
+        </div>
+        
+        <div class="dashboard-section">
+            <!-- System Health -->
+            <div class="card overview-card">
+                <h2>🔧 System Health</h2>
+                <p>Monitor system health and connectivity status</p>
+                <div id="systemStatus">Checking system status...</div>
+            </div>
+
+            <!-- User Statistics -->
+            <div class="card overview-card">
+                <h2>📊 User Statistics</h2>
+                <p>Overview of registered users and activity</p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">-</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="activeUsers">-</div>
+                        <div class="stat-label">Active Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalSteps">-</div>
+                        <div class="stat-label">Total Steps</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgSteps">-</div>
+                        <div class="stat-label">Avg Steps</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card overview-card">
+                <h2>⚡ Quick Actions</h2>
+                <p>Common administrative tasks</p>
+                
+                <!-- Data Management -->
+                <div class="action-section">
+                    <h3>📊 Data Management</h3>
+                    <div class="action-row">
+                        <button class="btn" onclick="refreshData()">🔄 Refresh All Data</button>
+                        <button class="btn btn-secondary" onclick="exportData()">⬇️ Export CSV</button>
+                        <button class="btn btn-secondary" onclick="generateReport()">📋 Generate Report</button>
+                        <button class="btn btn-secondary" onclick="backupData()">💾 Backup Data</button>
+                    </div>
+                </div>
+
+                <!-- Display & Cache -->
+                <div class="action-section">
+                    <h3>📺 Display & Cache</h3>
+                    <div class="action-row">
+                        <button class="btn" onclick="refreshLiveDisplay()">📺 Refresh Live Display</button>
+                        <button class="btn btn-secondary" onclick="clearCache()">🗑️ Clear Cache</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Section -->
+        <div class="section-header">
+            <h2>⚙️ Content Management</h2>
+            <p>User administration and data management tools</p>
+        </div>
+        
+        <div class="dashboard-section">
+
+            <!-- User Management -->
+            <div class="card user-management">
+                <h2>👥 User Management</h2>
+                <p>Manage user accounts and data</p>
+                <div class="action-row" style="margin-bottom: 20px;">
+                    <button class="btn" onclick="showAddUserForm()">➕ Add New User</button>
+                    <button class="btn" onclick="refreshUsers()">� Refresh Users</button>
+                    <button class="btn btn-secondary" onclick="forceRefreshUsers()">💨 Force Refresh</button>
+                </div>
+                
+                <!-- Add User Form -->
+                <div id="addUserForm" class="add-user-form" style="display: none;">
+                    <h3>Add New User</h3>
+                    <input type="text" id="newUserName" placeholder="User Name" required>
+                    <select id="newUserTeam" required>
+                        <option value="">Select Team</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Finance">Finance</option>
+                        <option value="HR">HR</option>
+                        <option value="Product">Product</option>
+                        <option value="Design">Design</option>
+                    </select>
+                    <input type="number" id="newUserGoal" placeholder="Daily Step Goal" min="1000" max="50000" value="10000">
+                    <div style="margin-top: 15px;">
+                        <button class="btn" onclick="addNewUser()">✅ Add User</button>
+                        <button class="btn btn-secondary" onclick="hideAddUserForm()">❌ Cancel</button>
+                    </div>
+                </div>
+
+                <!-- User List -->
+                <div id="userTableContainer">Loading users...</div>
+            </div>
+        </div>
+
+        <!-- Developer Tools Section -->
+        <div class="section-header">
+            <h2>🧪 Developer & Debug Tools</h2>
+            <p>Advanced testing and debugging utilities for system maintenance</p>
+        </div>
+        
+        <div class="dashboard-section">
+
+            <!-- Debug & Testing Tools -->
+            <div class="card debug-tools">
+                <h2>🧪 Debug & Testing Tools</h2>
+                <p>Comprehensive testing and debugging utilities for system maintenance</p>
+                
+                <!-- Database Tests -->
+                <div class="action-section">
+                    <h3>🗄️ Database Tests</h3>
+                    <div class="action-row">
+                        <button class="btn" onclick="testDatabaseConnection()">🔌 Test DB Connection</button>
+                        <button class="btn btn-secondary" onclick="testCRUDOperations()">📝 Test CRUD Operations</button>
+                        <button class="btn btn-secondary" onclick="validateDatabaseSchema()">🔍 Validate Schema</button>
+                    </div>
+                </div>
+
+                <!-- API Tests -->
+                <div class="action-section">
+                    <h3>🌐 API Tests</h3>
+                    <div class="action-row">
+                        <button class="btn" onclick="testAllAPIs()">🚀 Test All APIs</button>
+                        <button class="btn btn-secondary" onclick="testUserOperations()">👥 Test User Operations</button>
+                        <button class="btn btn-secondary" onclick="testDataRetrieval()">📊 Test Data Retrieval</button>
+                    </div>
+                </div>
+
+                <!-- Performance Tests -->
+                <div class="action-section">
+                    <h3>⚡ Performance Tests</h3>
+                    <div class="action-row">
+                        <button class="btn" onclick="runPerformanceTests()">🏁 Performance Suite</button>
+                        <button class="btn btn-secondary" onclick="testLoadTimes()">⏱️ Load Time Tests</button>
+                        <button class="btn btn-secondary" onclick="stressTestDatabase()">💪 Stress Test DB</button>
+                    </div>
+                </div>
+
+                <!-- Supabase Testing Suite -->
+                <div class="action-section">
+                    <h3>🔌 Supabase Testing</h3>
+                    <div class="action-row">
+                        <button class="btn" onclick="runSupabaseConfigTest()">⚙️ Config Test</button>
+                        <button class="btn btn-secondary" onclick="testSupabaseConnectivity()">📡 Connectivity</button>
+                        <button class="btn btn-secondary" onclick="testMethodCompatibility()">🔗 Method Check</button>
+                    </div>
+                </div>
+
+                <!-- Debug Console -->
+                <div class="action-section">
+                    <h3>🔧 Debug Console</h3>
+                    <div class="action-row">
+                        <button class="btn" onclick="showDebugConsole()">📟 Debug Console</button>
+                        <button class="btn btn-secondary" onclick="viewLogs()">📋 View Logs</button>
+                        <button class="btn btn-secondary" onclick="clearLogs()">🗑️ Clear Logs</button>
+                    </div>
+                </div>
+
+                <!-- Test Results Display -->
+                <div id="testResults" style="display: none; margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <h4>Test Results:</h4>
+                    <div id="testResultsContent">No tests run yet.</div>
+                </div>
+
+                <!-- Debug Console Display -->
+                <div id="debugConsole" style="display: none; margin-top: 20px; padding: 15px; background: #1f2937; color: #10b981; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto;">
+                    <div style="color: #f59e0b; margin-bottom: 10px;">DEBUG CONSOLE - Step Tracker Admin</div>
+                    <div id="debugOutput">Console ready. Run debug commands to see output here.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AdminDashboard {
+            constructor() {
+                // Check authentication before initializing
+                this.checkAuthentication();
+            }
+
+            checkAuthentication() {
+                const adminSession = localStorage.getItem('adminSession');
+                const sessionExpiry = localStorage.getItem('adminSessionExpiry');
+                
+                const now = new Date().getTime();
+                
+                // Check if user is authenticated and session hasn't expired
+                if (!adminSession || !sessionExpiry || now > parseInt(sessionExpiry)) {
+                    
+                    // Clear any existing auth data
+                    localStorage.removeItem('adminSession');
+                    localStorage.removeItem('adminSessionExpiry');
+                    
+                    // Redirect to login page
+                    window.location.href = '/admin-login.html';
+                    return;
+                }
+                
+                // User is authenticated, show the dashboard and proceed with initialization
+                console.log('✅ Admin authentication verified, initializing dashboard...');
+                document.body.style.display = 'block';
+                this.init();
+            }
+
+            async init() {
+                // Display admin info
+                this.displayAdminInfo();
+                
+                await this.loadStatistics();
+                await this.loadUsers();
+                await this.loadSystemDiagnostics();
+                this.setupEventListeners();
+            }
+
+            displayAdminInfo() {
+                try {
+                    const adminSession = localStorage.getItem('adminSession');
+                    if (adminSession) {
+                        const sessionData = JSON.parse(adminSession);
+                        const userInfoElement = document.querySelector('.user-info');
+                        if (userInfoElement && sessionData.username) {
+                            userInfoElement.textContent = `Admin: ${sessionData.username}`;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Could not display admin info:', error);
+                }
+            }
+
+            async loadStatistics() {
+                try {
+                    console.log('📊 Loading statistics...');
+                    
+                    // Check if SupabaseHelper is available
+                    if (typeof SupabaseHelper === 'undefined') {
+                        throw new Error('SupabaseHelper not loaded');
+                    }
+                    
+                    const users = await SupabaseHelper.getAllUsers();
+                    const today = new Date().toISOString().split('T')[0];
+                    
+                    document.getElementById('totalUsers').textContent = users.length;
+                    
+                    const activeToday = users.filter(user => {
+                        return user.last_active_date === today;
+                    });
+                    document.getElementById('activeUsers').textContent = activeToday.length;
+                    
+                    const totalSteps = users.reduce((sum, user) => sum + (user.total_steps || 0), 0);
+                    document.getElementById('totalSteps').textContent = totalSteps.toLocaleString();
+                    
+                    const avgSteps = users.length > 0 ? Math.round(totalSteps / users.length) : 0;
+                    document.getElementById('avgSteps').textContent = avgSteps.toLocaleString();
+                    
+                    console.log('✅ Statistics loaded successfully');
+                } catch (error) {
+                    console.error('❌ Error loading statistics:', error);
+                    
+                    // Show error in UI
+                    document.getElementById('totalUsers').textContent = 'Error';
+                    document.getElementById('activeUsers').textContent = 'Error';
+                    document.getElementById('totalSteps').textContent = 'Error';
+                    document.getElementById('avgSteps').textContent = 'Error';
+                }
+            }
+
+            async loadUsers(bustCache = false) {
+                const container = document.getElementById('userTableContainer');
+                container.innerHTML = '<div class="loading">Loading users...</div>';
+                
+                console.log('👥 Loading users...');
+
+                try {
+                    const users = await SupabaseHelper.getAllUsers(bustCache);
+                    console.log(`✅ Loaded ${users.length} users`);
+                    
+                    // Update global currentUsers array for other functions
+                    currentUsers = users;
+                    console.log('📝 Updated global currentUsers array');
+                    
+                    let html = `
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Team</th>
+                                    <th>Daily Goal</th>
+                                    <th>Total Steps</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    users.forEach(user => {
+                        const isActive = user.last_active_date === new Date().toISOString().split('T')[0];
+                        const statusClass = isActive ? 'status-active' : 'status-inactive';
+                        const statusText = isActive ? 'Active' : 'Inactive';
+                        
+                        html += `
+                            <tr id="user-row-${user.id}">
+                                <td><strong>${user.name}</strong></td>
+                                <td>${user.team}</td>
+                                <td>${user.daily_goal?.toLocaleString() || '10,000'}</td>
+                                <td>${user.total_steps?.toLocaleString() || '0'}</td>
+                                <td>${new Date(user.joined_date).toLocaleDateString()}</td>
+                                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-small" onclick="showEditStepsModal('${user.id}', '${user.name}', ${user.total_steps || 0})">📊 Edit Steps</button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteUser('${user.id}', '${user.name}')">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                    
+                    console.log('✅ User table updated in UI');
+
+                } catch (error) {
+                    console.error('❌ Error loading users:', error);
+                    container.innerHTML = `
+                        <div class="loading" style="color: #dc2626;">
+                            Error loading users: ${error.message}
+                            <br><br>
+                            <button class="btn" onclick="refreshUsers()">🔄 Try Again</button>
+                        </div>
+                    `;
+                }
+            }
+
+            async loadSystemDiagnostics() {
+                const statusDiv = document.getElementById('systemStatus');
+                statusDiv.innerHTML = '<div class="loading">Running diagnostics...</div>';
+
+                try {
+                    const diagnostics = await this.runSystemDiagnostics();
+                    this.displaySystemStatus(diagnostics);
+                } catch (error) {
+                    console.error('Error loading system diagnostics:', error);
+                    statusDiv.innerHTML = `
+                        <div style="color: #dc2626; padding: 10px; background: #fee2e2; border-radius: 6px; border: 1px solid #fecaca;">
+                            <strong>❌ Diagnostics Failed</strong><br>
+                            <small>${error.message}</small>
+                        </div>
+                    `;
+                }
+            }
+
+            async runSystemDiagnostics() {
+                const startTime = performance.now();
+                const diagnostics = {
+                    timestamp: new Date().toLocaleString(),
+                    checks: []
+                };
+
+                // Database Connectivity Test
+                try {
+                    const dbStart = performance.now();
+                    const testQuery = await SupabaseHelper.getAllUsers();
+                    const dbTime = Math.round(performance.now() - dbStart);
+                    
+                    diagnostics.checks.push({
+                        name: 'Database Connection',
+                        status: 'healthy',
+                        message: `Connected successfully (${dbTime}ms)`,
+                        icon: '✅',
+                        details: `Retrieved ${testQuery.length} users`
+                    });
+                } catch (error) {
+                    diagnostics.checks.push({
+                        name: 'Database Connection',
+                        status: 'error',
+                        message: `Connection failed: ${error.message}`,
+                        icon: '❌',
+                        details: 'Unable to connect to Supabase database'
+                    });
+                }
+
+                // Supabase Client Status
+                try {
+                    const clientReady = SupabaseHelper.isReady();
+                    diagnostics.checks.push({
+                        name: 'Supabase Client',
+                        status: clientReady ? 'healthy' : 'warning',
+                        message: clientReady ? 'Client initialized' : 'Client not ready',
+                        icon: clientReady ? '✅' : '⚠️',
+                        details: clientReady ? 'All client methods available' : 'May cause functionality issues'
+                    });
+                } catch (error) {
+                    diagnostics.checks.push({
+                        name: 'Supabase Client',
+                        status: 'error',
+                        message: 'Client check failed',
+                        icon: '❌',
+                        details: error.message
+                    });
+                }
+
+                // Authentication Status - Remove this section since no auth needed
+                
+                // Browser Storage
+                try {
+                    const localStorageTest = 'stepTrackerTest';
+                    localStorage.setItem(localStorageTest, 'test');
+                    localStorage.removeItem(localStorageTest);
+                    
+                    const storageSize = JSON.stringify(localStorage).length;
+                    const storageKB = Math.round(storageSize / 1024);
+                    
+                    diagnostics.checks.push({
+                        name: 'Browser Storage',
+                        status: 'healthy',
+                        message: `Working (${storageKB}KB used)`,
+                        icon: '✅',
+                        details: `${Object.keys(localStorage).length} items in localStorage`
+                    });
+                } catch (error) {
+                    diagnostics.checks.push({
+                        name: 'Browser Storage',
+                        status: 'error',
+                        message: 'Storage unavailable',
+                        icon: '❌',
+                        details: 'May affect session management'
+                    });
+                }
+
+                // Network Connectivity
+                diagnostics.checks.push({
+                    name: 'Network Status',
+                    status: navigator.onLine ? 'healthy' : 'error',
+                    message: navigator.onLine ? 'Online' : 'Offline',
+                    icon: navigator.onLine ? '✅' : '❌',
+                    details: navigator.onLine ? 'Internet connection available' : 'No internet connection detected'
+                });
+
+                // Performance Check
+                const totalTime = Math.round(performance.now() - startTime);
+                diagnostics.checks.push({
+                    name: 'System Performance',
+                    status: totalTime < 1000 ? 'healthy' : totalTime < 3000 ? 'warning' : 'error',
+                    message: `Diagnostics completed in ${totalTime}ms`,
+                    icon: totalTime < 1000 ? '✅' : totalTime < 3000 ? '⚠️' : '❌',
+                    details: totalTime < 1000 ? 'Excellent response time' : totalTime < 3000 ? 'Acceptable response time' : 'Slow response time'
+                });
+
+                // Overall system health
+                const healthyCount = diagnostics.checks.filter(c => c.status === 'healthy').length;
+                const warningCount = diagnostics.checks.filter(c => c.status === 'warning').length;
+                const errorCount = diagnostics.checks.filter(c => c.status === 'error').length;
+
+                diagnostics.overall = {
+                    status: errorCount > 0 ? 'error' : warningCount > 0 ? 'warning' : 'healthy',
+                    healthy: healthyCount,
+                    warnings: warningCount,
+                    errors: errorCount,
+                    total: diagnostics.checks.length
+                };
+
+                return diagnostics;
+            }
+
+            displaySystemStatus(diagnostics) {
+                const statusDiv = document.getElementById('systemStatus');
+                
+                let overallColor = '#10b981'; // green
+                let overallIcon = '✅';
+                let overallText = 'System Healthy';
+                
+                if (diagnostics.overall.status === 'warning') {
+                    overallColor = '#f59e0b';
+                    overallIcon = '⚠️';
+                    overallText = 'System Issues Detected';
+                } else if (diagnostics.overall.status === 'error') {
+                    overallColor = '#dc2626';
+                    overallIcon = '❌';
+                    overallText = 'System Problems';
+                }
+
+                let html = `
+                    <div style="background: white; border-radius: 8px; padding: 15px; border-left: 4px solid ${overallColor}; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="font-weight: 600; color: ${overallColor};">
+                                ${overallIcon} ${overallText}
+                            </div>
+                            <div style="font-size: 12px; color: #6b7280;">
+                                ${diagnostics.timestamp}
+                            </div>
+                        </div>
+                        <div style="font-size: 14px; color: #6b7280;">
+                            ${diagnostics.overall.healthy}/${diagnostics.overall.total} checks passed
+                            ${diagnostics.overall.warnings > 0 ? ` • ${diagnostics.overall.warnings} warnings` : ''}
+                            ${diagnostics.overall.errors > 0 ? ` • ${diagnostics.overall.errors} errors` : ''}
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; gap: 8px;">
+                `;
+
+                diagnostics.checks.forEach(check => {
+                    const bgColor = check.status === 'healthy' ? '#f0f9ff' : 
+                                   check.status === 'warning' ? '#fef3c7' : '#fee2e2';
+                    const borderColor = check.status === 'healthy' ? '#bae6fd' : 
+                                       check.status === 'warning' ? '#fde68a' : '#fecaca';
+
+                    html += `
+                        <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 6px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <div style="font-weight: 500; font-size: 14px;">
+                                    ${check.icon} ${check.name}
+                                </div>
+                                <div style="font-size: 12px; color: #6b7280;">
+                                    ${check.message}
+                                </div>
+                            </div>
+                            <div style="font-size: 12px; color: #6b7280;">
+                                ${check.details}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+
+                // Add refresh button
+                html += `
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button class="btn btn-secondary btn-small" onclick="refreshSystemDiagnostics()" style="font-size: 12px;">
+                            🔄 Run Diagnostics Again
+                        </button>
+                    </div>
+                `;
+
+                statusDiv.innerHTML = html;
+            }
+
+            setupEventListeners() {
+                // Event listeners would go here
+            }
+
+            showAddUserForm() {
+                document.getElementById('addUserForm').style.display = 'block';
+            }
+
+            hideAddUserForm() {
+                document.getElementById('addUserForm').style.display = 'none';
+                document.getElementById('userName').value = '';
+                document.getElementById('userTeam').value = '';
+                document.getElementById('userTeamCustom').value = '';
+                document.getElementById('userTeamCustom').style.display = 'none';
+                document.getElementById('userGoal').value = '10000';
+                this.hideDuplicateWarning();
+            }
+
+            hideDuplicateWarning() {
+                document.getElementById('duplicateWarning').style.display = 'none';
+            }
+
+            async checkForDuplicates() {
+                const name = document.getElementById('userName').value.trim().toLowerCase();
+                if (name.length < 3) return;
+
+                try {
+                    const users = await SupabaseHelper.getAllUsers();
+                    const duplicates = users.filter(user => {
+                        const userName = user.name.toLowerCase();
+                        return this.calculateSimilarity(userName, name) > 0.7;
+                    });
+
+                    if (duplicates.length > 0) {
+                        const duplicateDetails = duplicates.map(user => 
+                            `• ${user.name} (${user.team}) - ${user.total_steps || 0} steps`
+                        ).join('<br>');
+                        
+                        document.getElementById('duplicateDetails').innerHTML = duplicateDetails;
+                        document.getElementById('duplicateWarning').style.display = 'block';
+                    } else {
+                        this.hideDuplicateWarning();
+                    }
+                } catch (error) {
+                    console.error('Error checking duplicates:', error);
+                }
+            }
+
+            calculateSimilarity(str1, str2) {
+                const longer = str1.length > str2.length ? str1 : str2;
+                const shorter = str1.length > str2.length ? str2 : str1;
+                
+                if (longer.length === 0) return 1.0;
+                
+                const editDistance = this.levenshteinDistance(longer, shorter);
+                return (longer.length - editDistance) / longer.length;
+            }
+
+            levenshteinDistance(str1, str2) {
+                const matrix = [];
+                for (let i = 0; i <= str2.length; i++) {
+                    matrix[i] = [i];
+                }
+                for (let j = 0; j <= str1.length; j++) {
+                    matrix[0][j] = j;
+                }
+                for (let i = 1; i <= str2.length; i++) {
+                    for (let j = 1; j <= str1.length; j++) {
+                        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                            matrix[i][j] = matrix[i - 1][j - 1];
+                        } else {
+                            matrix[i][j] = Math.min(
+                                matrix[i - 1][j - 1] + 1,
+                                matrix[i][j - 1] + 1,
+                                matrix[i - 1][j] + 1
+                            );
+                        }
+                    }
+                }
+                return matrix[str2.length][str1.length];
+            }
+
+            async addUser() {
+                const name = document.getElementById('userName').value.trim();
+                const teamSelect = document.getElementById('userTeam');
+                const customTeamInput = document.getElementById('userTeamCustom');
+                
+                // Determine which team value to use
+                let team;
+                if (teamSelect.value === '__NEW_TEAM__') {
+                    team = customTeamInput.value.trim();
+                } else {
+                    team = teamSelect.value.trim();
+                }
+                
+                const goal = parseInt(document.getElementById('userGoal').value) || 10000;
+
+                if (!name || !team) {
+                    alert('Please fill in all required fields including the team name');
+                    return;
+                }
+
+                try {
+                    await SupabaseHelper.registerUser(name, team, goal);
+                    alert(`✅ User "${name}" added successfully to team "${team}"!`);
+                    this.hideAddUserForm();
+                    await this.loadUsers(true); // Use cache busting after adding user
+                    await this.loadStatistics();
+                } catch (error) {
+                    console.error('Error adding user:', error);
+                    alert(`❌ Error adding user: ${error.message}`);
+                }
+            }
+        }
+
+        // Global functions
+        let dashboard;
+        let currentUsers = [];
+        let debugLog = [];
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Admin Dashboard starting...');
+            console.log('🔗 SupabaseHelper available:', typeof SupabaseHelper !== 'undefined');
+            
+            try {
+                dashboard = new AdminDashboard();
+            } catch (error) {
+                console.error('❌ Failed to initialize admin dashboard:', error);
+                
+                // Show error message to user
+                document.body.innerHTML = `
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #f8fafc;">
+                        <div style="text-align: center; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 500px;">
+                            <h2 style="color: #dc2626; margin-bottom: 20px;">⚠️ Dashboard Error</h2>
+                            <p style="color: #6b7280; margin-bottom: 20px;">Failed to initialize the admin dashboard:</p>
+                            <code style="background: #fee2e2; padding: 10px; border-radius: 4px; color: #991b1b; display: block; margin-bottom: 20px;">${error.message}</code>
+                            <button onclick="window.location.reload()" style="background: #0078d4; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">🔄 Reload Page</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        function adminLogout() {
+            if (confirm('Are you sure you want to log out of the admin dashboard?')) {
+                // Clear all admin session data
+                localStorage.removeItem('adminSession');
+                localStorage.removeItem('adminSessionExpiry');
+                
+                console.log('🚪 Admin logged out');
+                
+                // Redirect to login page
+                window.location.href = '/admin-login.html';
+            }
+        }
+
+        function refreshData() {
+            console.log('🔄 refreshData() called, dashboard available:', !!dashboard);
+            if (dashboard) {
+                console.log('📊 Refreshing statistics...');
+                dashboard.loadStatistics();
+                console.log('👥 Refreshing users with cache busting...');
+                dashboard.loadUsers(true); // Always use cache busting for refresh
+                console.log('✅ Data refresh initiated');
+            } else {
+                console.error('❌ Dashboard not available for refresh');
+            }
+        }
+
+        function refreshUsers() {
+            console.log('🔄 refreshUsers() called, dashboard available:', !!dashboard);
+            if (dashboard) {
+                console.log('👥 Refreshing users with aggressive cache clearing...');
+                
+                // Clear any potential local caches
+                if (typeof currentUsers !== 'undefined') {
+                    currentUsers = [];
+                }
+                
+                const container = document.getElementById('userTableContainer');
+                container.innerHTML = '<div class="loading">Clearing cache and refreshing users...</div>';
+                
+                // Force a small delay to ensure UI updates
+                setTimeout(() => {
+                    dashboard.loadUsers(true); // Always use cache busting to prevent stale data
+                }, 100);
+            } else {
+                console.error('❌ Dashboard not available for user refresh');
+            }
+        }
+
+        function forceRefreshUsers() {
+            console.log('🔄💨 forceRefreshUsers() called with cache busting, dashboard available:', !!dashboard);
+            if (dashboard) {
+                console.log('👥 Force refreshing users with cache busting...');
+                const container = document.getElementById('userTableContainer');
+                container.innerHTML = '<div class="loading">Force refreshing users (clearing cache)...</div>';
+                dashboard.loadUsers(true); // Pass true for cache busting
+            } else {
+                console.error('❌ Dashboard not available for force refresh');
+            }
+        }
+
+        function showAddUserForm() {
+            hideAllForms();
+            populateTeamDropdown();
+            document.getElementById('addUserForm').style.display = 'block';
+        }
+
+        function hideAddUserForm() {
+            dashboard.hideAddUserForm();
+        }
+
+        async function populateTeamDropdown() {
+            const teamSelect = document.getElementById('userTeam');
+            const customTeamInput = document.getElementById('userTeamCustom');
+            
+            try {
+                teamSelect.innerHTML = '<option value="">Loading teams...</option>';
+                
+                const teams = await SupabaseHelper.getAllTeams();
+                
+                teamSelect.innerHTML = '<option value="">Select a team...</option>';
+                
+                // Add existing teams
+                teams.forEach(team => {
+                    teamSelect.innerHTML += `<option value="${team}">${team}</option>`;
+                });
+                
+                // Add option to create new team
+                teamSelect.innerHTML += '<option value="__NEW_TEAM__">➕ Add New Team</option>';
+                
+                // Handle team selection
+                teamSelect.onchange = function() {
+                    if (this.value === '__NEW_TEAM__') {
+                        customTeamInput.style.display = 'block';
+                        customTeamInput.focus();
+                        customTeamInput.required = true;
+                    } else {
+                        customTeamInput.style.display = 'none';
+                        customTeamInput.required = false;
+                        customTeamInput.value = '';
+                    }
+                };
+                
+                console.log(`✅ Loaded ${teams.length} teams into dropdown`);
+                
+            } catch (error) {
+                console.error('Error loading teams:', error);
+                teamSelect.innerHTML = '<option value="">Error loading teams</option>';
+            }
+        }
+
+        function addUser() {
+            dashboard.addUser();
+        }
+
+        function checkForDuplicates() {
+            dashboard.checkForDuplicates();
+        }
+
+        function proceedWithDuplicate() {
+            dashboard.hideDuplicateWarning();
+            dashboard.addUser();
+        }
+
+        function hideDuplicateWarning() {
+            dashboard.hideDuplicateWarning();
+        }
+
+        function showMergeOptions() {
+            hideAllForms();
+            populateUserSelects();
+            document.getElementById('mergeUsersForm').style.display = 'block';
+        }
+
+        function showManualStepsForm() {
+            hideAllForms();
+            populateStepUserSelect();
+            document.getElementById('manualStepsForm').style.display = 'block';
+        }
+
+        function hideManualStepsForm() {
+            document.getElementById('manualStepsForm').style.display = 'none';
+            document.getElementById('stepUserId').value = '';
+            document.getElementById('manualSteps').value = '';
+            document.getElementById('stepReason').value = '';
+            document.getElementById('updateToday').checked = true;
+        }
+
+        function hideMergeUsersForm() {
+            document.getElementById('mergeUsersForm').style.display = 'none';
+            document.getElementById('mergeSourceUser').value = '';
+            document.getElementById('mergeTargetUser').value = '';
+            document.getElementById('mergePreview').style.display = 'none';
+        }
+
+        function hideDuplicateResults() {
+            document.getElementById('duplicateResults').style.display = 'none';
+        }
+
+        function hideAllForms() {
+            document.getElementById('addUserForm').style.display = 'none';
+            document.getElementById('manualStepsForm').style.display = 'none';
+            document.getElementById('mergeUsersForm').style.display = 'none';
+            document.getElementById('duplicateResults').style.display = 'none';
+        }
+
+        async function populateUserSelects() {
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                currentUsers = users;
+                
+                const sourceSelect = document.getElementById('mergeSourceUser');
+                const targetSelect = document.getElementById('mergeTargetUser');
+                
+                sourceSelect.innerHTML = '<option value="">Select user to merge from...</option>';
+                targetSelect.innerHTML = '<option value="">Select user to merge into...</option>';
+                
+                users.forEach(user => {
+                    const option = `<option value="${user.id}">${user.name} (${user.team}) - ${(user.total_steps || 0).toLocaleString()} steps</option>`;
+                    sourceSelect.innerHTML += option;
+                    targetSelect.innerHTML += option;
+                });
+            } catch (error) {
+                console.error('Error loading users for merge:', error);
+            }
+        }
+
+        async function populateStepUserSelect() {
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                const select = document.getElementById('stepUserId');
+                
+                select.innerHTML = '<option value="">Select a user...</option>';
+                
+                users.forEach(user => {
+                    select.innerHTML += `<option value="${user.id}">${user.name} (${user.team}) - Current: ${(user.total_steps || 0).toLocaleString()} steps</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading users for steps:', error);
+            }
+        }
+
+        async function addManualSteps() {
+            const userId = document.getElementById('stepUserId').value;
+            const steps = parseInt(document.getElementById('manualSteps').value);
+            const reason = document.getElementById('stepReason').value.trim();
+            const updateToday = document.getElementById('updateToday').checked;
+
+            if (!userId || !steps || steps <= 0) {
+                alert('Please select a user and enter a valid number of steps');
+                return;
+            }
+
+            try {
+                const user = currentUsers.find(u => u.id === userId);
+                if (!user) {
+                    alert('User not found');
+                    return;
+                }
+
+                const newTotal = (user.total_steps || 0) + steps;
+                const updateData = { total_steps: newTotal };
+                
+                if (updateToday) {
+                    updateData.last_active_date = new Date().toISOString().split('T')[0];
+                }
+
+                await SupabaseHelper.updateUser(userId, updateData);
+                
+                // Verify the update was successful
+                await new Promise(resolve => setTimeout(resolve, 300)); // Brief delay for database consistency
+                const allUsers = await SupabaseHelper.getAllUsers();
+                const updatedUser = allUsers.find(u => u.id === userId);
+                
+                if (updatedUser && updatedUser.total_steps >= newTotal) {
+                    console.log(`✅ Verified steps update: ${user.name} now has ${updatedUser.total_steps} total steps`);
+                } else {
+                    console.warn('⚠️ Step update verification failed - data might not have persisted correctly');
+                }
+                
+                // Log the manual addition
+                console.log(`Manual steps added: ${steps} steps to ${user.name} (${reason || 'No reason provided'})`);
+                
+                alert(`✅ Successfully added ${steps.toLocaleString()} steps to ${user.name}!\n\nNew total: ${newTotal.toLocaleString()} steps\nReason: ${reason || 'Manual admin addition'}`);
+                
+                hideManualStepsForm();
+                
+                // Force refresh with delay to ensure database consistency
+                setTimeout(async () => {
+                    refreshData();
+                }, 500);
+            } catch (error) {
+                console.error('Error adding manual steps:', error);
+                alert(`❌ Error adding steps: ${error.message}`);
+            }
+        }
+
+        async function scanForDuplicates() {
+            hideAllForms();
+            document.getElementById('duplicateResults').style.display = 'block';
+            document.getElementById('duplicateResultsContent').innerHTML = 'Scanning for duplicates...';
+
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                const duplicateGroups = [];
+                
+                for (let i = 0; i < users.length; i++) {
+                    for (let j = i + 1; j < users.length; j++) {
+                        const similarity = dashboard.calculateSimilarity(
+                            users[i].name.toLowerCase(), 
+                            users[j].name.toLowerCase()
+                        );
+                        
+                        if (similarity > 0.7) {
+                            duplicateGroups.push({
+                                similarity: Math.round(similarity * 100),
+                                users: [users[i], users[j]]
+                            });
+                        }
+                    }
+                }
+
+                if (duplicateGroups.length === 0) {
+                    document.getElementById('duplicateResultsContent').innerHTML = `
+                        <div style="text-align: center; color: #10b981; padding: 20px;">
+                            ✅ No duplicates found!<br>
+                            <small>All ${users.length} users have unique names</small>
+                        </div>
+                    `;
+                } else {
+                    let html = `<div style="margin-bottom: 15px;"><strong>Found ${duplicateGroups.length} potential duplicate(s):</strong></div>`;
+                    
+                    duplicateGroups.forEach((group, index) => {
+                        html += `
+                            <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 6px; margin-bottom: 10px;">
+                                <div style="font-weight: bold; color: #991b1b; margin-bottom: 10px;">
+                                    Duplicate Group ${index + 1} (${group.similarity}% similar):
+                                </div>
+                                ${group.users.map(user => `
+                                    <div style="margin: 5px 0; padding: 8px; background: white; border-radius: 4px;">
+                                        • <strong>${user.name}</strong> (${user.team}) - ${(user.total_steps || 0).toLocaleString()} steps
+                                    </div>
+                                `).join('')}
+                                <div style="margin-top: 10px;">
+                                    <button class="btn btn-small" onclick="initiateMerge('${group.users[0].id}', '${group.users[1].id}')">
+                                        🔄 Merge These Users
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('duplicateResultsContent').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error scanning for duplicates:', error);
+                document.getElementById('duplicateResultsContent').innerHTML = `
+                    <div style="color: #dc2626; text-align: center; padding: 20px;">
+                        ❌ Error scanning for duplicates: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function initiateMerge(userId1, userId2) {
+            hideDuplicateResults();
+            showMergeOptions();
+            
+            setTimeout(() => {
+                document.getElementById('mergeSourceUser').value = userId1;
+                document.getElementById('mergeTargetUser').value = userId2;
+                previewMerge();
+            }, 100);
+        }
+
+        function previewMerge() {
+            const sourceId = document.getElementById('mergeSourceUser').value;
+            const targetId = document.getElementById('mergeTargetUser').value;
+
+            if (!sourceId || !targetId) {
+                alert('Please select both users to preview the merge');
+                return;
+            }
+
+            if (sourceId === targetId) {
+                alert('Cannot merge a user with themselves');
+                return;
+            }
+
+            const sourceUser = currentUsers.find(u => u.id === sourceId);
+            const targetUser = currentUsers.find(u => u.id === targetId);
+
+            if (!sourceUser || !targetUser) {
+                alert('Selected users not found');
+                return;
+            }
+
+            const combinedSteps = (sourceUser.total_steps || 0) + (targetUser.total_steps || 0);
+            const keepTeam = targetUser.team;
+            const keepGoal = Math.max(sourceUser.daily_goal || 10000, targetUser.daily_goal || 10000);
+            
+            const previewContent = `
+                <table style="width: 100%; font-size: 14px;">
+                    <tr>
+                        <td style="padding: 5px;"><strong>Action:</strong></td>
+                        <td style="padding: 5px;">Merge "${sourceUser.name}" into "${targetUser.name}"</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px;"><strong>Result Name:</strong></td>
+                        <td style="padding: 5px;">${targetUser.name} (keeping target name)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px;"><strong>Team:</strong></td>
+                        <td style="padding: 5px;">${keepTeam}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px;"><strong>Combined Steps:</strong></td>
+                        <td style="padding: 5px;">${sourceUser.total_steps || 0} + ${targetUser.total_steps || 0} = <strong>${combinedSteps.toLocaleString()}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px;"><strong>Daily Goal:</strong></td>
+                        <td style="padding: 5px;">${keepGoal.toLocaleString()}</td>
+                    </tr>
+                    <tr style="background: #fee2e2;">
+                        <td style="padding: 5px;"><strong>⚠️ Will Delete:</strong></td>
+                        <td style="padding: 5px;">"${sourceUser.name}" account</td>
+                    </tr>
+                </table>
+            `;
+
+            document.getElementById('mergePreviewContent').innerHTML = previewContent;
+            document.getElementById('mergePreview').style.display = 'block';
+        }
+
+        async function executeMerge() {
+            const sourceId = document.getElementById('mergeSourceUser').value;
+            const targetId = document.getElementById('mergeTargetUser').value;
+
+            if (!sourceId || !targetId) {
+                alert('Please select both users and preview the merge first');
+                return;
+            }
+
+            const sourceUser = currentUsers.find(u => u.id === sourceId);
+            const targetUser = currentUsers.find(u => u.id === targetId);
+
+            if (!confirm(`⚠️ FINAL CONFIRMATION ⚠️\n\nThis will permanently merge "${sourceUser.name}" into "${targetUser.name}" and delete the source account.\n\nThis action CANNOT be undone!\n\nProceed with merge?`)) {
+                return;
+            }
+
+            try {
+                const combinedSteps = (sourceUser.total_steps || 0) + (targetUser.total_steps || 0);
+                const keepGoal = Math.max(sourceUser.daily_goal || 10000, targetUser.daily_goal || 10000);
+                
+                // Update target user with combined data
+                await SupabaseHelper.updateUser(targetId, {
+                    total_steps: combinedSteps,
+                    daily_goal: keepGoal,
+                    last_active_date: new Date().toISOString().split('T')[0]
+                });
+                
+                // Delete source user
+                await SupabaseHelper.deleteUser(sourceId);
+                
+                alert(`✅ Merge completed successfully!\n\n"${sourceUser.name}" has been merged into "${targetUser.name}"\nCombined steps: ${combinedSteps.toLocaleString()}`);
+                
+                hideMergeUsersForm();
+                refreshData();
+            } catch (error) {
+                console.error('Error executing merge:', error);
+                alert(`❌ Error executing merge: ${error.message}`);
+            }
+        }
+
+        function showEditStepsModal(userId, userName, currentSteps) {
+            showManualStepsForm();
+            document.getElementById('stepUserId').value = userId;
+            document.getElementById('manualSteps').placeholder = `Current: ${currentSteps.toLocaleString()} steps`;
+            document.getElementById('stepReason').value = `Manual edit for ${userName}`;
+        }
+
+        function refreshSystemDiagnostics() {
+            if (dashboard) {
+                dashboard.loadSystemDiagnostics();
+            }
+        }
+
+        // Debug and Testing Functions
+        function addToDebugLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push({ timestamp, message, type });
+            
+            if (document.getElementById('debugConsole').style.display !== 'none') {
+                updateDebugConsole();
+            }
+        }
+
+        function updateDebugConsole() {
+            const output = document.getElementById('debugOutput');
+            const logs = debugLog.slice(-50).map(log => {
+                const color = log.type === 'error' ? '#ef4444' : 
+                             log.type === 'success' ? '#10b981' : 
+                             log.type === 'warning' ? '#f59e0b' : '#6b7280';
+                return `<div style="color: ${color};">[${log.timestamp}] ${log.message}</div>`;
+            }).join('');
+            
+            output.innerHTML = logs || 'Console ready. Run debug commands to see output here.';
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function showDebugConsole() {
+            const console = document.getElementById('debugConsole');
+            console.style.display = console.style.display === 'none' ? 'block' : 'none';
+            
+            if (console.style.display === 'block') {
+                updateDebugConsole();
+                addToDebugLog('Debug console activated', 'success');
+            }
+        }
+
+        function showTestResults(title, results) {
+            const container = document.getElementById('testResults');
+            const content = document.getElementById('testResultsContent');
+            
+            let html = `<h5>${title}</h5>`;
+            html += '<div style="display: grid; gap: 8px; margin-top: 10px;">';
+            
+            results.forEach(result => {
+                const bgColor = result.status === 'pass' ? '#f0f9ff' : 
+                               result.status === 'warning' ? '#fef3c7' : '#fee2e2';
+                const borderColor = result.status === 'pass' ? '#bae6fd' : 
+                                   result.status === 'warning' ? '#fde68a' : '#fecaca';
+                const icon = result.status === 'pass' ? '✅' : 
+                            result.status === 'warning' ? '⚠️' : '❌';
+                
+                html += `
+                    <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 6px; padding: 10px;">
+                        <div style="font-weight: 500; font-size: 14px; margin-bottom: 4px;">
+                            ${icon} ${result.test}
+                        </div>
+                        <div style="font-size: 12px; color: #6b7280;">
+                            ${result.message}
+                        </div>
+                        ${result.details ? `<div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">${result.details}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            content.innerHTML = html;
+            container.style.display = 'block';
+        }
+
+        async function testDatabaseConnection() {
+            addToDebugLog('Testing database connection...', 'info');
+            const results = [];
+            
+            try {
+                const startTime = performance.now();
+                const users = await SupabaseHelper.getAllUsers();
+                const responseTime = Math.round(performance.now() - startTime);
+                
+                results.push({
+                    test: 'Database Connection',
+                    status: 'pass',
+                    message: `Connected successfully in ${responseTime}ms`,
+                    details: `Retrieved ${users.length} users from database`
+                });
+                
+                addToDebugLog(`DB connection successful: ${users.length} users in ${responseTime}ms`, 'success');
+            } catch (error) {
+                results.push({
+                    test: 'Database Connection',
+                    status: 'fail',
+                    message: 'Connection failed',
+                    details: error.message
+                });
+                
+                addToDebugLog(`DB connection failed: ${error.message}`, 'error');
+            }
+            
+            showTestResults('Database Connection Test', results);
+        }
+
+        async function testCRUDOperations() {
+            addToDebugLog('Testing CRUD operations...', 'info');
+            const results = [];
+            const testUser = {
+                name: 'Test User ' + Date.now(),
+                team: 'Test Team',
+                daily_goal: 10000
+            };
+            
+            let createdUserId = null;
+            
+            // Test CREATE
+            try {
+                const newUser = await SupabaseHelper.registerUser(testUser.name, testUser.team, testUser.daily_goal);
+                createdUserId = newUser.id;
+                
+                results.push({
+                    test: 'CREATE User',
+                    status: 'pass',
+                    message: 'User created successfully',
+                    details: `Created user: ${testUser.name} with ID: ${createdUserId}`
+                });
+                
+                addToDebugLog(`CREATE test passed: User ${testUser.name} created`, 'success');
+            } catch (error) {
+                results.push({
+                    test: 'CREATE User',
+                    status: 'fail',
+                    message: 'Failed to create user',
+                    details: error.message
+                });
+                
+                addToDebugLog(`CREATE test failed: ${error.message}`, 'error');
+            }
+            
+            // Test READ
+            if (createdUserId) {
+                try {
+                    const users = await SupabaseHelper.getAllUsers();
+                    const foundUser = users.find(u => u.id === createdUserId);
+                    
+                    if (foundUser) {
+                        results.push({
+                            test: 'READ User',
+                            status: 'pass',
+                            message: 'User retrieved successfully',
+                            details: `Found user: ${foundUser.name} in ${users.length} total users`
+                        });
+                        
+                        addToDebugLog(`READ test passed: Found user ${foundUser.name}`, 'success');
+                    } else {
+                        throw new Error('User not found in retrieved list');
+                    }
+                } catch (error) {
+                    results.push({
+                        test: 'READ User',
+                        status: 'fail',
+                        message: 'Failed to read user',
+                        details: error.message
+                    });
+                    
+                    addToDebugLog(`READ test failed: ${error.message}`, 'error');
+                }
+            }
+            
+            // Test UPDATE
+            if (createdUserId) {
+                try {
+                    await SupabaseHelper.updateUser(createdUserId, { total_steps: 5000 });
+                    
+                    results.push({
+                        test: 'UPDATE User',
+                        status: 'pass',
+                        message: 'User updated successfully',
+                        details: 'Updated total_steps to 5000'
+                    });
+                    
+                    addToDebugLog(`UPDATE test passed: Updated user steps to 5000`, 'success');
+                } catch (error) {
+                    results.push({
+                        test: 'UPDATE User',
+                        status: 'fail',
+                        message: 'Failed to update user',
+                        details: error.message
+                    });
+                    
+                    addToDebugLog(`UPDATE test failed: ${error.message}`, 'error');
+                }
+            }
+            
+            // Test DELETE
+            if (createdUserId) {
+                try {
+                    await SupabaseHelper.deleteUser(createdUserId);
+                    
+                    results.push({
+                        test: 'DELETE User',
+                        status: 'pass',
+                        message: 'User deleted successfully',
+                        details: `Deleted test user: ${testUser.name}`
+                    });
+                    
+                    addToDebugLog(`DELETE test passed: Deleted user ${testUser.name}`, 'success');
+                } catch (error) {
+                    results.push({
+                        test: 'DELETE User',
+                        status: 'fail',
+                        message: 'Failed to delete user',
+                        details: error.message
+                    });
+                    
+                    addToDebugLog(`DELETE test failed: ${error.message}`, 'error');
+                }
+            }
+            
+            showTestResults('CRUD Operations Test', results);
+        }
+
+        async function validateDatabaseSchema() {
+            addToDebugLog('Validating database schema...', 'info');
+            const results = [];
+            
+            try {
+                // Test user table structure by checking required fields
+                const users = await SupabaseHelper.getAllUsers();
+                
+                if (users.length > 0) {
+                    const sampleUser = users[0];
+                    const requiredFields = ['id', 'name', 'team', 'daily_goal', 'total_steps', 'joined_date'];
+                    const missingFields = requiredFields.filter(field => !(field in sampleUser));
+                    
+                    if (missingFields.length === 0) {
+                        results.push({
+                            test: 'User Table Schema',
+                            status: 'pass',
+                            message: 'All required fields present',
+                            details: `Validated fields: ${requiredFields.join(', ')}`
+                        });
+                        
+                        addToDebugLog(`Schema validation passed: All user fields present`, 'success');
+                    } else {
+                        results.push({
+                            test: 'User Table Schema',
+                            status: 'fail',
+                            message: 'Missing required fields',
+                            details: `Missing: ${missingFields.join(', ')}`
+                        });
+                        
+                        addToDebugLog(`Schema validation failed: Missing fields ${missingFields.join(', ')}`, 'error');
+                    }
+                } else {
+                    results.push({
+                        test: 'User Table Schema',
+                        status: 'warning',
+                        message: 'No users found to validate schema',
+                        details: 'Database appears empty'
+                    });
+                    
+                    addToDebugLog(`Schema validation warning: No users found`, 'warning');
+                }
+            } catch (error) {
+                results.push({
+                    test: 'Database Schema',
+                    status: 'fail',
+                    message: 'Schema validation failed',
+                    details: error.message
+                });
+                
+                addToDebugLog(`Schema validation failed: ${error.message}`, 'error');
+            }
+            
+            showTestResults('Database Schema Validation', results);
+        }
+
+        async function testAllAPIs() {
+            addToDebugLog('Testing all API endpoints...', 'info');
+            const results = [];
+            
+            // Comprehensive test suite - enhanced from test-supabase.html
+            const apiTests = [
+                { name: 'isReady', test: () => SupabaseHelper.isReady() },
+                { name: 'testConnection', test: () => SupabaseHelper.testConnection() },
+                { name: 'getAllUsers', test: () => SupabaseHelper.getAllUsers() },
+                { name: 'getRecentActivities', test: () => SupabaseHelper.getRecentActivities(5) },
+                { name: 'getTeamStats', test: () => SupabaseHelper.getTeamStats() },
+                { name: 'getSystemStats', test: () => SupabaseHelper.getSystemStats() },
+                { name: 'getAllTeams', test: () => SupabaseHelper.getAllTeams() },
+                { name: 'addActivity (3 params)', test: () => SupabaseHelper.addActivity('test', 'Admin dashboard test activity', new Date().toISOString()) },
+                { name: 'addActivity (4 params)', test: () => SupabaseHelper.addActivity('test', 'Admin dashboard test activity (4-param)', new Date().toISOString(), 'Admin Test') }
+            ];
+            
+            for (const apiTest of apiTests) {
+                try {
+                    const startTime = performance.now();
+                    const result = await apiTest.test();
+                    const responseTime = Math.round(performance.now() - startTime);
+                    
+                    // Handle different result types
+                    let details;
+                    if (Array.isArray(result)) {
+                        details = `Returned array with ${result.length} items`;
+                    } else if (typeof result === 'object' && result !== null) {
+                        if (result.success !== undefined) {
+                            details = result.success ? `Success: ${result.message || 'OK'}` : `Error: ${result.error || 'Unknown error'}`;
+                        } else if (result.id) {
+                            details = `Created/Retrieved object with ID: ${result.id}`;
+                        } else {
+                            details = `Returned object with ${Object.keys(result).length} properties`;
+                        }
+                    } else {
+                        details = `Result: ${result}`;
+                    }
+                    
+                    results.push({
+                        test: `API: ${apiTest.name}`,
+                        status: 'pass',
+                        message: `Success in ${responseTime}ms`,
+                        details: details
+                    });
+                    
+                    addToDebugLog(`✅ API test passed: ${apiTest.name} (${responseTime}ms)`, 'success');
+                } catch (error) {
+                    results.push({
+                        test: `API: ${apiTest.name}`,
+                        status: 'fail',
+                        message: 'API call failed',
+                        details: error.message
+                    });
+                    
+                    addToDebugLog(`❌ API test failed: ${apiTest.name} - ${error.message}`, 'error');
+                }
+            }
+            
+            showTestResults('Comprehensive API Endpoint Tests', results);
+        }
+
+        async function testUserOperations() {
+            addToDebugLog('Testing user operations...', 'info');
+            const results = [];
+            
+            // Test user retrieval and data consistency
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                const teamStats = await SupabaseHelper.getTeamStats();
+                
+                results.push({
+                    test: 'User Data Retrieval',
+                    status: 'pass',
+                    message: `Retrieved ${users.length} users and ${teamStats.length} teams`,
+                    details: 'All user operations functioning normally'
+                });
+                
+                // Validate data consistency
+                const totalUsersFromTeams = teamStats.reduce((sum, team) => sum + team.member_count, 0);
+                
+                if (totalUsersFromTeams === users.length) {
+                    results.push({
+                        test: 'Data Consistency',
+                        status: 'pass',
+                        message: 'User counts match across tables',
+                        details: `${users.length} users = ${totalUsersFromTeams} team members`
+                    });
+                    
+                    addToDebugLog(`Data consistency check passed`, 'success');
+                } else {
+                    results.push({
+                        test: 'Data Consistency',
+                        status: 'warning',
+                        message: 'User count mismatch',
+                        details: `${users.length} users vs ${totalUsersFromTeams} team members`
+                    });
+                    
+                    addToDebugLog(`Data consistency warning: Count mismatch`, 'warning');
+                }
+                
+                addToDebugLog(`User operations test completed: ${users.length} users, ${teamStats.length} teams`, 'success');
+            } catch (error) {
+                results.push({
+                    test: 'User Operations',
+                    status: 'fail',
+                    message: 'User operations failed',
+                    details: error.message
+                });
+                
+                addToDebugLog(`User operations failed: ${error.message}`, 'error');
+            }
+            
+            showTestResults('User Operations Test', results);
+        }
+
+        async function testDataRetrieval() {
+            addToDebugLog('Testing data retrieval performance...', 'info');
+            const results = [];
+            
+            const tests = [
+                { name: 'Users', method: () => SupabaseHelper.getAllUsers() },
+                { name: 'Team Stats', method: () => SupabaseHelper.getTeamStats() }
+            ];
+            
+            for (const test of tests) {
+                try {
+                    const startTime = performance.now();
+                    const data = await test.method();
+                    const responseTime = Math.round(performance.now() - startTime);
+                    
+                    const status = responseTime < 500 ? 'pass' : responseTime < 1000 ? 'warning' : 'fail';
+                    const performance_desc = responseTime < 500 ? 'Excellent' : responseTime < 1000 ? 'Good' : 'Slow';
+                    
+                    results.push({
+                        test: `${test.name} Retrieval`,
+                        status: status,
+                        message: `${performance_desc} performance: ${responseTime}ms`,
+                        details: `Retrieved ${Array.isArray(data) ? data.length : 'object'} records`
+                    });
+                    
+                    addToDebugLog(`Data retrieval ${test.name}: ${responseTime}ms (${performance_desc})`, status === 'pass' ? 'success' : 'warning');
+                } catch (error) {
+                    results.push({
+                        test: `${test.name} Retrieval`,
+                        status: 'fail',
+                        message: 'Data retrieval failed',
+                        details: error.message
+                    });
+                    
+                    addToDebugLog(`Data retrieval failed for ${test.name}: ${error.message}`, 'error');
+                }
+            }
+            
+            showTestResults('Data Retrieval Performance', results);
+        }
+
+        async function runPerformanceTests() {
+            addToDebugLog('Running comprehensive performance tests...', 'info');
+            const results = [];
+            
+            // Multiple rapid requests test
+            try {
+                const iterations = 5;
+                const startTime = performance.now();
+                const promises = [];
+                
+                for (let i = 0; i < iterations; i++) {
+                    promises.push(SupabaseHelper.getAllUsers());
+                }
+                
+                await Promise.all(promises);
+                const totalTime = Math.round(performance.now() - startTime);
+                const avgTime = Math.round(totalTime / iterations);
+                
+                results.push({
+                    test: 'Concurrent Requests',
+                    status: avgTime < 200 ? 'pass' : avgTime < 500 ? 'warning' : 'fail',
+                    message: `${iterations} concurrent requests completed`,
+                    details: `Total: ${totalTime}ms, Average: ${avgTime}ms per request`
+                });
+                
+                addToDebugLog(`Performance test: ${iterations} requests in ${totalTime}ms (avg: ${avgTime}ms)`, 'success');
+            } catch (error) {
+                results.push({
+                    test: 'Concurrent Requests',
+                    status: 'fail',
+                    message: 'Performance test failed',
+                    details: error.message
+                });
+                
+                addToDebugLog(`Performance test failed: ${error.message}`, 'error');
+            }
+            
+            showTestResults('Performance Test Suite', results);
+        }
+
+        async function testLoadTimes() {
+            addToDebugLog('Testing page load and initialization times...', 'info');
+            const results = [];
+            
+            // Test dashboard initialization time
+            const initStart = performance.now();
+            
+            try {
+                await dashboard.loadStatistics();
+                await dashboard.loadUsers();
+                
+                const initTime = Math.round(performance.now() - initStart);
+                
+                results.push({
+                    test: 'Dashboard Initialization',
+                    status: initTime < 1000 ? 'pass' : initTime < 2000 ? 'warning' : 'fail',
+                    message: `Dashboard loaded in ${initTime}ms`,
+                    details: 'Statistics and user data loaded successfully'
+                });
+                
+                addToDebugLog(`Dashboard initialization: ${initTime}ms`, initTime < 1000 ? 'success' : 'warning');
+            } catch (error) {
+                results.push({
+                    test: 'Dashboard Initialization',
+                    status: 'fail',
+                    message: 'Dashboard initialization failed',
+                    details: error.message
+                });
+                
+                addToDebugLog(`Dashboard initialization failed: ${error.message}`, 'error');
+            }
+            
+            showTestResults('Load Time Tests', results);
+        }
+
+        async function stressTestDatabase() {
+            addToDebugLog('Running database stress test...', 'info');
+            const results = [];
+            
+            if (!confirm('This will perform intensive database operations. Continue?')) {
+                return;
+            }
+            
+            try {
+                const iterations = 10;
+                const startTime = performance.now();
+                let successful = 0;
+                let failed = 0;
+                
+                for (let i = 0; i < iterations; i++) {
+                    try {
+                        await SupabaseHelper.getAllUsers();
+                        await SupabaseHelper.getTeamStats();
+                        successful++;
+                    } catch (error) {
+                        failed++;
+                        addToDebugLog(`Stress test iteration ${i + 1} failed: ${error.message}`, 'error');
+                    }
+                }
+                
+                const totalTime = Math.round(performance.now() - startTime);
+                const avgTime = Math.round(totalTime / iterations);
+                const successRate = Math.round((successful / iterations) * 100);
+                
+                results.push({
+                    test: 'Database Stress Test',
+                    status: successRate === 100 ? 'pass' : successRate >= 80 ? 'warning' : 'fail',
+                    message: `${successRate}% success rate (${successful}/${iterations})`,
+                    details: `Total time: ${totalTime}ms, Average: ${avgTime}ms per iteration`
+                });
+                
+                addToDebugLog(`Stress test completed: ${successful}/${iterations} successful (${totalTime}ms)`, successRate === 100 ? 'success' : 'warning');
+            } catch (error) {
+                results.push({
+                    test: 'Database Stress Test',
+                    status: 'fail',
+                    message: 'Stress test failed',
+                    details: error.message
+                });
+                
+                addToDebugLog(`Stress test failed: ${error.message}`, 'error');
+            }
+            
+            showTestResults('Database Stress Test', results);
+        }
+
+        function viewLogs() {
+            if (debugLog.length === 0) {
+                alert('No logs available. Run some tests to generate logs.');
+                return;
+            }
+            
+            const logContent = debugLog.map(log => 
+                `[${log.timestamp}] ${log.type.toUpperCase()}: ${log.message}`
+            ).join('\n');
+            
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `step_tracker_debug_${new Date().toISOString().split('T')[0]}.log`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            addToDebugLog(`Debug log exported: ${debugLog.length} entries`, 'success');
+        }
+
+        function clearLogs() {
+            if (confirm('Clear all debug logs?')) {
+                debugLog = [];
+                updateDebugConsole();
+                addToDebugLog('Debug log cleared', 'info');
+            }
+        }
+
+        let isDeleteInProgress = false;
+
+        async function deleteUser(userId, userName) {
+            if (isDeleteInProgress) {
+                alert('⚠️ A deletion is already in progress. Please wait...');
+                return;
+            }
+            
+            // Check if user still exists in current data (prevent double deletion)
+            if (!currentUsers.find(user => user.id === userId)) {
+                alert('⚠️ This user has already been deleted or no longer exists.');
+                return;
+            }
+            
+            if (confirm(`⚠️ Are you sure you want to permanently delete user "${userName}"?\n\nThis will:\n• Remove the user from the database\n• Delete all their step data\n• Update team statistics\n\nThis action CANNOT be undone!`)) {
+                isDeleteInProgress = true;
+                try {
+                    console.log(`🗑️ Deleting user: ${userName} (${userId})`);
+                    
+                    // Show loading state on the specific user row
+                    const userRow = document.getElementById(`user-row-${userId}`);
+                    const deleteButtons = document.querySelectorAll(`button[onclick*="${userId}"]`);
+                    
+                    // Disable all buttons for this user immediately
+                    deleteButtons.forEach(btn => {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.6';
+                        if (btn.textContent.includes('Delete')) {
+                            btn.textContent = 'Deleting...';
+                        }
+                    });
+                    
+                    // Add visual feedback to the row
+                    if (userRow) {
+                        userRow.style.opacity = '0.5';
+                        userRow.style.backgroundColor = '#fee2e2';
+                    }
+                    
+                    // Delete from Supabase with enhanced verification
+                    const result = await SupabaseHelper.deleteUser(userId);
+                    console.log('✅ User deleted from database:', result);
+                    
+                    // Remove from global currentUsers array immediately
+                    const originalLength = currentUsers.length;
+                    currentUsers = currentUsers.filter(user => user.id !== userId);
+                    console.log(`📝 Updated global currentUsers array: ${originalLength} -> ${currentUsers.length}`);
+                    
+                    // Remove the row from UI immediately
+                    if (userRow) {
+                        userRow.style.transition = 'opacity 0.3s';
+                        userRow.style.opacity = '0';
+                        setTimeout(() => {
+                            userRow.remove();
+                            // Update the user count display if it exists
+                            const countElement = document.querySelector('.user-count');
+                            if (countElement) {
+                                countElement.textContent = currentUsers.length;
+                            }
+                        }, 300);
+                    }
+                    
+                    // Show success message
+                    alert(`✅ User "${userName}" has been successfully deleted!\n\nThe user and all their data have been permanently removed.`);
+                    
+                    // Force refresh statistics with cache busting
+                    setTimeout(async () => {
+                        console.log('🔄 Refreshing statistics and UI after user deletion...');
+                        await dashboard.loadStatistics();
+                        console.log('✅ Statistics refreshed after deletion');
+                    }, 1000);
+                    
+                    console.log('✅ User deletion completed successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Error deleting user:', error);
+                    
+                    // Restore row appearance on error
+                    const userRow = document.getElementById(`user-row-${userId}`);
+                    if (userRow) {
+                        userRow.style.opacity = '1';
+                        userRow.style.backgroundColor = '';
+                    }
+                    
+                    // Re-enable buttons on error
+                    const deleteButtons = document.querySelectorAll(`button[onclick*="${userId}"]`);
+                    deleteButtons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        if (btn.textContent.includes('Deleting')) {
+                            btn.textContent = 'Delete';
+                        }
+                    });
+                    
+                    alert(`❌ Failed to delete user "${userName}"\n\nError: ${error.message}\n\nThe user has not been deleted. Please try again or check the console for details.`);
+                } finally {
+                    isDeleteInProgress = false;
+                }
+            }
+        }
+
+        // Enhanced Quick Actions
+        async function refreshLiveDisplay() {
+            try {
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (key.includes('stepTracker') || key.includes('leaderboard')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                
+                const sessionKeys = Object.keys(sessionStorage);
+                sessionKeys.forEach(key => {
+                    if (key.includes('stepTracker') || key.includes('leaderboard')) {
+                        sessionStorage.removeItem(key);
+                    }
+                });
+                
+                alert('✅ Live display cache cleared successfully!\n\nEffect: Forces the live display to fetch fresh data on next refresh\nNote: Refresh the live display page to see updated data');
+            } catch (error) {
+                alert(`❌ Error refreshing live display: ${error.message}`);
+            }
+        }
+
+        async function exportData() {
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                const csvContent = "data:text/csv;charset=utf-8," 
+                    + "Name,Team,Daily Goal,Total Steps,Joined Date\n"
+                    + users.map(user => 
+                        `"${user.name}","${user.team}",${user.daily_goal},${user.total_steps},"${user.joined_date}"`
+                    ).join("\n");
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `step_tracker_data_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                alert('✅ CSV file exported successfully!\n\nFile contains: User names, teams, goals, total steps, and join dates\nFormat: Comma-separated values (.csv) - Opens in Excel/Sheets');
+            } catch (error) {
+                alert(`❌ Error exporting CSV data: ${error.message}`);
+            }
+        }
+
+        function clearCache() {
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        names.forEach(name => {
+                            caches.delete(name);
+                        });
+                    });
+                }
+                alert('✅ All browser caches cleared successfully!\n\nCleared: Local storage, session storage, and browser cache\nEffect: Forces fresh data loading across all pages');
+            } catch (error) {
+                alert(`❌ Error clearing cache: ${error.message}`);
+            }
+        }
+
+        async function resetDailyStats() {
+            if (confirm('⚠️ This will reset all daily step counts to 0 for today. This action cannot be undone. Continue?')) {
+                try {
+                    const today = new Date().toISOString().split('T')[0];
+                    alert('🔧 Reset Daily Stats feature requires database function implementation. Contact developer to implement this feature.');
+                } catch (error) {
+                    alert(`❌ Error resetting daily stats: ${error.message}`);
+                }
+            }
+        }
+
+        async function generateReport() {
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                const totalUsers = users.length;
+                const totalSteps = users.reduce((sum, user) => sum + (user.total_steps || 0), 0);
+                const averageSteps = Math.round(totalSteps / totalUsers);
+                const today = new Date().toLocaleDateString();
+                
+                const reportContent = `
+STEP TRACKER REPORT - ${today}
+${'='.repeat(40)}
+
+📊 SUMMARY STATISTICS:
+• Total Users: ${totalUsers}
+• Total Steps: ${totalSteps.toLocaleString()}
+• Average Steps per User: ${averageSteps.toLocaleString()}
+
+👥 TOP PERFORMERS:
+${users.sort((a, b) => (b.total_steps || 0) - (a.total_steps || 0))
+    .slice(0, 10)
+    .map((user, index) => `${index + 1}. ${user.name} (${user.team}): ${(user.total_steps || 0).toLocaleString()} steps`)
+    .join('\n')}
+
+🏆 TEAM SUMMARY:
+${Object.entries(
+    users.reduce((teams, user) => {
+        teams[user.team] = (teams[user.team] || 0) + (user.total_steps || 0);
+        return teams;
+    }, {})
+)
+.sort((a, b) => b[1] - a[1])
+.map(([team, steps]) => `• ${team}: ${steps.toLocaleString()} steps`)
+.join('\n')}
+                `;
+                
+                const blob = new Blob([reportContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `step_tracker_report_${new Date().toISOString().split('T')[0]}.txt`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                alert('✅ Text report generated and downloaded successfully!\n\nFile contains: Summary stats, top performers, team rankings\nFormat: Plain text (.txt) - Human-readable report for presentations');
+            } catch (error) {
+                alert(`❌ Error generating report: ${error.message}`);
+            }
+        }
+
+        async function backupData() {
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                const backupData = {
+                    timestamp: new Date().toISOString(),
+                    version: '1.0',
+                    users: users
+                };
+                
+                const dataStr = JSON.stringify(backupData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `step_tracker_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                alert('✅ JSON backup created and downloaded successfully!\n\nFile contains: Complete user database with metadata\nFormat: JSON (.json) - Structured data for system restoration');
+            } catch (error) {
+                alert(`❌ Error creating backup: ${error.message}`);
+            }
+        }
+
+        // Enhanced Supabase Configuration Tests
+        async function runSupabaseConfigTest() {
+            addToDebugLog('🔧 Running comprehensive Supabase configuration test...', 'info');
+            const results = [];
+
+            // Test 1: Configuration Validation
+            try {
+                const configValid = typeof SUPABASE_CONFIG !== 'undefined' && 
+                                   SUPABASE_CONFIG.url && 
+                                   SUPABASE_CONFIG.anonKey;
+                
+                results.push({
+                    test: 'Configuration Validation',
+                    status: configValid ? 'pass' : 'fail',
+                    message: configValid ? 'Configuration loaded correctly' : 'Configuration missing or invalid',
+                    details: configValid ? `URL: ${SUPABASE_CONFIG.url.substring(0, 30)}...` : 'Check SUPABASE_CONFIG object'
+                });
+                
+                addToDebugLog(configValid ? '✅ Configuration validation passed' : '❌ Configuration validation failed', configValid ? 'success' : 'error');
+            } catch (error) {
+                results.push({
+                    test: 'Configuration Validation',
+                    status: 'fail',
+                    message: 'Configuration test failed',
+                    details: error.message
+                });
+            }
+
+            // Test 2: SupabaseHelper Availability
+            try {
+                const helperAvailable = typeof SupabaseHelper !== 'undefined';
+                const methodCount = helperAvailable ? Object.getOwnPropertyNames(SupabaseHelper).filter(name => typeof SupabaseHelper[name] === 'function').length : 0;
+                
+                results.push({
+                    test: 'SupabaseHelper Availability',
+                    status: helperAvailable ? 'pass' : 'fail',
+                    message: helperAvailable ? 'SupabaseHelper loaded correctly' : 'SupabaseHelper not found',
+                    details: helperAvailable ? `Available methods: ${methodCount}` : 'Check if supabase-config.js is loaded'
+                });
+                
+                addToDebugLog(helperAvailable ? `✅ SupabaseHelper available with ${methodCount} methods` : '❌ SupabaseHelper not available', helperAvailable ? 'success' : 'error');
+            } catch (error) {
+                results.push({
+                    test: 'SupabaseHelper Availability',
+                    status: 'fail',
+                    message: 'Helper availability test failed',
+                    details: error.message
+                });
+            }
+
+            // Test 3: Connection Ready State
+            try {
+                const isReady = SupabaseHelper.isReady();
+                results.push({
+                    test: 'Connection Ready State',
+                    status: isReady ? 'pass' : 'fail',
+                    message: isReady ? 'Supabase client ready' : 'Supabase client not ready',
+                    details: isReady ? 'Client initialized and connected' : 'Client may not be initialized properly'
+                });
+                
+                addToDebugLog(isReady ? '✅ Supabase client ready' : '❌ Supabase client not ready', isReady ? 'success' : 'error');
+            } catch (error) {
+                results.push({
+                    test: 'Connection Ready State',
+                    status: 'fail',
+                    message: 'Ready state test failed',
+                    details: error.message
+                });
+            }
+
+            showTestResults('Supabase Configuration Test', results);
+        }
+
+        async function testSupabaseConnectivity() {
+            addToDebugLog('🔌 Testing Supabase connectivity...', 'info');
+            const results = [];
+
+            try {
+                const startTime = performance.now();
+                const connectionResult = await SupabaseHelper.testConnection();
+                const responseTime = Math.round(performance.now() - startTime);
+                
+                results.push({
+                    test: 'Database Connection',
+                    status: connectionResult.success ? 'pass' : 'fail',
+                    message: connectionResult.success ? `Connected in ${responseTime}ms` : 'Connection failed',
+                    details: connectionResult.success ? connectionResult.message : connectionResult.error
+                });
+                
+                addToDebugLog(connectionResult.success ? `✅ Database connected (${responseTime}ms)` : `❌ Database connection failed: ${connectionResult.error}`, connectionResult.success ? 'success' : 'error');
+            } catch (error) {
+                results.push({
+                    test: 'Database Connection',
+                    status: 'fail', 
+                    message: 'Connection test failed',
+                    details: error.message
+                });
+                
+                addToDebugLog(`❌ Connection test failed: ${error.message}`, 'error');
+            }
+
+            showTestResults('Supabase Connectivity Test', results);
+        }
+
+        async function testMethodCompatibility() {
+            addToDebugLog('🔄 Testing method compatibility between main app and live display...', 'info');
+            const results = [];
+
+            // Test addActivity method with both parameter formats
+            try {
+                // Test 3-parameter version (main app style)
+                const activity3 = await SupabaseHelper.addActivity('test', 'Admin 3-param test', new Date().toISOString());
+                results.push({
+                    test: 'addActivity (3 params)',
+                    status: 'pass',
+                    message: 'Method works with 3 parameters',
+                    details: `Created activity ID: ${activity3.id}`
+                });
+                addToDebugLog('✅ addActivity (3-param) compatibility verified', 'success');
+            } catch (error) {
+                results.push({
+                    test: 'addActivity (3 params)',
+                    status: 'fail',
+                    message: '3-parameter method failed',
+                    details: error.message
+                });
+                addToDebugLog(`❌ addActivity (3-param) failed: ${error.message}`, 'error');
+            }
+
+            try {
+                // Test 4-parameter version (live display style)
+                const activity4 = await SupabaseHelper.addActivity('test', 'Admin 4-param test', new Date().toISOString(), 'Admin Dashboard');
+                results.push({
+                    test: 'addActivity (4 params)',
+                    status: 'pass',
+                    message: 'Method works with 4 parameters',
+                    details: `Created activity ID: ${activity4.id}`
+                });
+                addToDebugLog('✅ addActivity (4-param) compatibility verified', 'success');
+            } catch (error) {
+                results.push({
+                    test: 'addActivity (4 params)',
+                    status: 'fail',
+                    message: '4-parameter method failed',
+                    details: error.message
+                });
+                addToDebugLog(`❌ addActivity (4-param) failed: ${error.message}`, 'error');
+            }
+
+            showTestResults('Method Compatibility Test', results);
+        }
+
+        function showSystemInfo() {
+            const info = `
+🖥️ SYSTEM INFORMATION:
+${'='.repeat(30)}
+
+🌐 Environment:
+• URL: ${window.location.href}
+• User Agent: ${navigator.userAgent.substring(0, 100)}...
+• Local Time: ${new Date().toLocaleString()}
+• Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
+
+💾 Browser Storage:
+• Local Storage Items: ${Object.keys(localStorage).length}
+• Session Storage Items: ${Object.keys(sessionStorage).length}
+• Cookies Enabled: ${navigator.cookieEnabled}
+
+🔧 Supabase Status:
+• Client Ready: ${SupabaseHelper.isReady() ? '✅ Yes' : '❌ No'}
+
+📱 Device Info:
+• Screen Size: ${screen.width}x${screen.height}
+• Viewport: ${window.innerWidth}x${window.innerHeight}
+• Online: ${navigator.onLine ? '✅ Yes' : '❌ No'}
+            `;
+            
+            alert(info);
+        }
+    </script>
+</body>
+</html>
