@@ -513,13 +513,18 @@ class LiveDisplay {
                     // Test Supabase connectivity with a simple query
                     console.log('🧪 Testing Supabase connectivity...');
                     await this.testSupabaseConnection();
+                    console.log('✅ Connection test passed, proceeding with data loading...');
                     
                     // Load from Supabase - this is our PRIMARY data source
                     console.log('☁️ Loading data from Supabase (PRIMARY source)');
+                    console.log('📋 Step 1: Getting all users...');
                     const supabaseUsers = await SupabaseHelper.getAllUsers();
+                    console.log(`✅ Step 1 complete: Got ${supabaseUsers.length} users from Supabase`);
                     
                     // Get activities using merged approach but prioritize Supabase
+                    console.log('📋 Step 2: Getting merged activities...');
                     activities = await this.getMergedActivitiesCloudFirst();
+                    console.log(`✅ Step 2 complete: Got ${activities.length} activities`);
                     
                     console.log(`✅ SUCCESS: Loaded from Supabase - ${supabaseUsers.length} users, ${activities.length} activities`);
                     
@@ -559,10 +564,12 @@ class LiveDisplay {
                     }
                     
                     // Convert Supabase users to the format expected by the display
+                    console.log('📋 Step 3: Converting users to display format...');
                     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
                     console.log('📅 Today date for querying:', today);
                     
-                    users = await Promise.all(supabaseUsers.map(async (supabaseUser) => {
+                    users = await Promise.all(supabaseUsers.map(async (supabaseUser, index) => {
+                        console.log(`👤 Processing user ${index + 1}/${supabaseUsers.length}: ${supabaseUser.name}`);
                         // Get today's steps for this user
                         try {
                             const dailySteps = await SupabaseHelper.getUserSteps(supabaseUser.id, today, today);
@@ -605,10 +612,14 @@ class LiveDisplay {
                         }
                     }));
                 
+                console.log('✅ Step 3 complete: User conversion finished');
                 console.log(`Converted ${users.length} users for display:`, users);
                 console.log(`✅ Successfully loaded ${users.length} users and ${activities.length} activities from Supabase`);
                 
                                 } catch (supabaseError) {
+                    console.error('❌ Detailed Supabase error:', supabaseError);
+                    console.error('❌ Error stack:', supabaseError.stack);
+                    console.error('❌ Error occurred in Supabase data loading process');
                     console.warn('❌ Supabase connection failed, falling back to localStorage:', supabaseError);
                     console.log('📱 FALLBACK: Connection or Supabase error detected');
                     
