@@ -182,6 +182,8 @@ class LiveDisplay {
             }
         });
         
+        // Debug functions are now completely disabled to prevent test activities
+        /*
         // Debug: Add a test button for Supabase connection
         console.log('🧪 Adding debug test for Supabase');
         const testSupabaseConnection = async () => {
@@ -215,9 +217,11 @@ class LiveDisplay {
             }
         };
         
-        // Run test after 2 seconds, then every 30 seconds for debugging
-        setTimeout(testSupabaseConnection, 2000);
+        // Run test after 2 seconds, then every 30 seconds for debugging (DISABLED)
+        // setTimeout(testSupabaseConnection, 2000);
+        */
         
+        /*
         // DEBUG: Also create a test user and activity to verify data flow
         const createTestData = async () => {
             try {
@@ -243,8 +247,9 @@ class LiveDisplay {
             }
         };
         
-        // Create test data after 5 seconds for debugging
-        setTimeout(createTestData, 5000);
+        // Create test data after 5 seconds for debugging (DISABLED)
+        // setTimeout(createTestData, 5000);
+        */
     }
 
     async retry() {
