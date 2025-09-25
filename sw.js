@@ -1,7 +1,8 @@
 // Enhanced Service Worker for CxE Americas Step Tracker
-const CACHE_NAME = 'step-tracker-v2'; // Updated version for new optimizations
-const STATIC_CACHE = 'step-tracker-static-v2';
-const DYNAMIC_CACHE = 'step-tracker-dynamic-v2';
+const CACHE_VERSION = '2024-09-24-001'; // Update this timestamp when deploying
+const CACHE_NAME = `step-tracker-v${CACHE_VERSION}`;
+const STATIC_CACHE = `step-tracker-static-v${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `step-tracker-dynamic-v${CACHE_VERSION}`;
 
 // Critical resources to cache immediately
 const CRITICAL_RESOURCES = [
@@ -19,11 +20,18 @@ const EXTERNAL_RESOURCES = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
-// Cache strategies
+// Cache strategies with TTL (Time To Live)
 const CACHE_STRATEGIES = {
     'cache-first': ['fonts.googleapis.com', 'cdnjs.cloudflare.com'],
     'network-first': ['api.open-meteo.com'],
-    'stale-while-revalidate': ['/']
+    'stale-while-revalidate': ['/', '/index.html', '/script.js', '/styles.css', '/manifest.json']
+};
+
+// Cache TTL in milliseconds (1 hour for critical resources)
+const CACHE_TTL = {
+    'critical': 60 * 60 * 1000, // 1 hour
+    'static': 24 * 60 * 60 * 1000, // 24 hours  
+    'dynamic': 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
 // Install event - enhanced caching strategy
@@ -146,12 +154,38 @@ async function networkFirst(request) {
 
 async function staleWhileRevalidate(request) {
     const cachedResponse = await caches.match(request);
+    const cacheKey = `${request.url}_timestamp`;
+    
+    // Check if cached response is still fresh
+    if (cachedResponse) {
+        const cachedTimestamp = await getCacheTimestamp(cacheKey);
+        const now = Date.now();
+        const maxAge = isCriticalResource(request.url) ? CACHE_TTL.critical : CACHE_TTL.dynamic;
+        
+        // If cache is stale, prefer network response
+        if (cachedTimestamp && (now - cachedTimestamp > maxAge)) {
+            console.log('Cache is stale, fetching fresh content for:', request.url);
+            try {
+                const networkResponse = await fetch(request);
+                if (networkResponse.ok) {
+                    const cache = await caches.open(DYNAMIC_CACHE);
+                    await cache.put(request, networkResponse.clone());
+                    await setCacheTimestamp(cacheKey, now);
+                    return networkResponse;
+                }
+            } catch (error) {
+                console.warn('Network fetch failed, returning stale cache:', error);
+                return cachedResponse;
+            }
+        }
+    }
     
     // Fetch in background to update cache
-    const fetchPromise = fetch(request).then(response => {
+    const fetchPromise = fetch(request).then(async response => {
         if (response.ok) {
-            const cache = caches.open(DYNAMIC_CACHE);
-            cache.then(c => c.put(request, response.clone()));
+            const cache = await caches.open(DYNAMIC_CACHE);
+            await cache.put(request, response.clone());
+            await setCacheTimestamp(cacheKey, Date.now());
         }
         return response;
     }).catch(error => {
@@ -165,6 +199,34 @@ async function staleWhileRevalidate(request) {
     
     // Otherwise wait for network
     return await fetchPromise || handleFallback(request);
+}
+
+// Helper functions for cache timestamp management
+async function getCacheTimestamp(key) {
+    try {
+        const cache = await caches.open('step-tracker-meta');
+        const response = await cache.match(key);
+        if (response) {
+            const timestamp = await response.text();
+            return parseInt(timestamp);
+        }
+    } catch (error) {
+        console.warn('Failed to get cache timestamp:', error);
+    }
+    return null;
+}
+
+async function setCacheTimestamp(key, timestamp) {
+    try {
+        const cache = await caches.open('step-tracker-meta');
+        await cache.put(key, new Response(timestamp.toString()));
+    } catch (error) {
+        console.warn('Failed to set cache timestamp:', error);
+    }
+}
+
+function isCriticalResource(url) {
+    return CRITICAL_RESOURCES.some(resource => url.includes(resource));
 }
 
 async function handleFallback(request) {
@@ -191,7 +253,10 @@ self.addEventListener('activate', (event) => {
             caches.keys().then(cacheNames => {
                 return Promise.all(
                     cacheNames.map(cacheName => {
-                        if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+                        // Keep only current version caches and meta cache
+                        if (cacheName !== STATIC_CACHE && 
+                            cacheName !== DYNAMIC_CACHE && 
+                            cacheName !== 'step-tracker-meta') {
                             console.log('Deleting old cache:', cacheName);
                             return caches.delete(cacheName);
                         }
@@ -200,12 +265,26 @@ self.addEventListener('activate', (event) => {
             }),
             
             // Take control of all clients immediately
-            self.clients.claim()
+            self.clients.claim(),
+            
+            // Notify clients about the update
+            notifyClientsOfUpdate()
         ]).then(() => {
             console.log('Service Worker activated and ready');
         })
     );
 });
+
+// Notify all clients that a new version is available
+async function notifyClientsOfUpdate() {
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+        client.postMessage({
+            type: 'SW_UPDATED',
+            message: 'New version available! Refresh to get the latest features.'
+        });
+    });
+}
 
 // Background sync for data persistence (if supported)
 self.addEventListener('sync', (event) => {
