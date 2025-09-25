@@ -57,16 +57,25 @@ class LiveDisplay {
             // Add debug functions to window for console access
             window.liveDisplayDebug = {
                 checkTimer: () => {
-                    console.log('🔍 Timer Status:', {
+                    const now = Date.now();
+                    const status = {
                         timerActive: !!this.refreshTimer,
                         timerId: this.refreshTimer,
+                        refreshCount: this.refreshCount || 0,
+                        autoRefreshStartTime: this.autoRefreshStartTime,
+                        timeSinceStart: this.autoRefreshStartTime ? 
+                            `${Math.floor((now - this.autoRefreshStartTime) / 1000)}s` : 'Unknown',
                         lastUpdateTime: this.lastUpdateTime ? this.formatTimeWithoutSeconds(this.lastUpdateTime) : 'Never',
                         lastRefreshTime: this.lastRefreshTime ? this.formatTimeWithoutSeconds(this.lastRefreshTime) : 'Never',
                         timeSinceLastRefresh: this.lastRefreshTime ? 
-                            `${Math.floor((Date.now() - this.lastRefreshTime.getTime()) / 1000)}s ago` : 'Never',
+                            `${Math.floor((now - this.lastRefreshTime.getTime()) / 1000)}s ago` : 'Never',
+                        nextRefreshIn: this.lastRefreshTime ? 
+                            `${Math.max(0, 30 - Math.floor((now - this.lastRefreshTime.getTime()) / 1000))}s` : 'Unknown',
                         pageVisible: !document.hidden,
                         refreshInterval: `${this.refreshInterval}ms (${this.refreshInterval/1000}s)`
-                    });
+                    };
+                    console.log('🔍 Timer Status:', status);
+                    return status;
                 },
                 restartTimer: () => {
                     console.log('🔄 Manually restarting auto-refresh timer');
@@ -75,6 +84,16 @@ class LiveDisplay {
                 triggerRefresh: () => {
                     console.log('🔄 Manually triggering refresh');
                     this.loadData();
+                },
+                testTimer: () => {
+                    console.log('🧪 Testing timer with 5-second interval for diagnostics');
+                    const testTimer = setInterval(() => {
+                        console.log('🧪 Test timer tick:', new Date().toLocaleTimeString());
+                    }, 5000);
+                    setTimeout(() => {
+                        clearInterval(testTimer);
+                        console.log('🧪 Test timer completed');
+                    }, 16000); // Run for ~3 ticks
                 }
             };
             
@@ -209,18 +228,32 @@ class LiveDisplay {
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 console.log('📱 Window became visible, checking auto-refresh status');
+                console.log('📱 Timer status:', {
+                    timerActive: !!this.refreshTimer,
+                    timerId: this.refreshTimer,
+                    refreshCount: this.refreshCount || 0,
+                    timeSinceStart: this.autoRefreshStartTime ? 
+                        `${Math.floor((Date.now() - this.autoRefreshStartTime) / 1000)}s` : 'Unknown'
+                });
                 
-                // Only restart if timer is not running
+                // Always refresh data when coming back to focus
+                this.loadData();
+                
+                // Only restart timer if it's not running
                 if (!this.refreshTimer) {
                     console.log('📱 Timer was stopped, restarting auto-refresh');
-                    this.loadData();
                     this.startAutoRefresh();
                 } else {
-                    console.log('📱 Timer still active, just refreshing data');
-                    this.loadData();
+                    console.log('📱 Timer still active, continuing normal schedule');
                 }
             } else {
                 console.log('📱 Window became hidden');
+                console.log('📱 Timer status before hiding:', {
+                    timerActive: !!this.refreshTimer,
+                    timerId: this.refreshTimer,
+                    refreshCount: this.refreshCount || 0
+                });
+                // Note: We don't stop the timer when hidden, browsers handle this automatically
             }
         });
         
@@ -356,9 +389,14 @@ class LiveDisplay {
         console.log(`🔄 Starting auto-refresh with interval: ${this.refreshInterval}ms (${this.refreshInterval/1000} seconds)`);
         console.log(`⏰ Next refresh scheduled for: ${this.formatTimeWithoutSeconds(new Date(Date.now() + this.refreshInterval))}`);
         
+        // Store current time as start time for debugging
+        this.autoRefreshStartTime = Date.now();
+        this.refreshCount = 0;
+        
         this.refreshTimer = setInterval(() => {
             const now = new Date();
-            console.log('🔄 Auto-refresh triggered at:', this.formatTimeWithoutSeconds(now));
+            this.refreshCount++;
+            console.log(`🔄 Auto-refresh triggered #${this.refreshCount} at: ${this.formatTimeWithoutSeconds(now)}`);
             console.log(`⏰ Next refresh scheduled for: ${this.formatTimeWithoutSeconds(new Date(Date.now() + this.refreshInterval))}`);
             
             // Validation: Log actual interval timing
@@ -366,10 +404,24 @@ class LiveDisplay {
                 const actualInterval = now.getTime() - this.lastRefreshTime.getTime();
                 const intervalDiff = Math.abs(actualInterval - this.refreshInterval);
                 console.log(`✅ Refresh interval validation: Expected ${this.refreshInterval}ms, Actual ${actualInterval}ms (diff: ${intervalDiff}ms)`);
+                
+                if (intervalDiff > 5000) { // More than 5 seconds off
+                    console.warn('⚠️ Timer drift detected! Restarting auto-refresh...');
+                    this.startAutoRefresh();
+                    return;
+                }
             }
             this.lastRefreshTime = now;
             
-            this.loadData();
+            // Call loadData with error handling
+            try {
+                console.log('🔄 Calling loadData() from auto-refresh...');
+                this.loadData().catch(error => {
+                    console.error('❌ Error in auto-refresh loadData:', error);
+                });
+            } catch (error) {
+                console.error('❌ Synchronous error in auto-refresh:', error);
+            }
         }, this.refreshInterval);
         console.log('✅ Auto-refresh timer started with ID:', this.refreshTimer);
         
