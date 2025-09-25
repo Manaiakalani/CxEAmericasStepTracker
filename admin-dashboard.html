@@ -557,6 +557,90 @@
             gap: 10px;
             margin-bottom: 15px;
         }
+
+        /* Cache Management Styles */
+        .cache-management {
+            border-left: 4px solid #10b981;
+        }
+
+        .cache-info {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .cache-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background: #0078d4;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+        }
+
+        .action-btn.danger {
+            background: #dc2626;
+        }
+
+        .action-btn.danger:hover {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .cache-strategy {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .cache-strategy h4 {
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+
+        .cache-strategy ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .cache-strategy li {
+            margin-bottom: 8px;
+            color: #475569;
+        }
+
+        .cache-detail {
+            background: white;
+            padding: 8px 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border-left: 3px solid #3b82f6;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+        }
+
+        .cache-update-time {
+            margin-top: 16px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body style="display: none;">
@@ -644,6 +728,38 @@
         </div>
         
         <div class="dashboard-section">
+
+            <!-- Cache Management -->
+            <div class="card cache-management">
+                <h2>🗂️ Cache Management</h2>
+                <p>Manage app caching and ensure users get fresh content</p>
+                
+                <div class="cache-info" id="cacheInfo">
+                    <p>Loading cache information...</p>
+                </div>
+                
+                <div class="cache-controls">
+                    <button onclick="refreshCacheInfo()" class="action-btn">
+                        🔄 Check Cache Status
+                    </button>
+                    <button onclick="clearAppCache()" class="action-btn danger">
+                        🗑️ Clear All Cache
+                    </button>
+                    <button onclick="updateServiceWorker()" class="action-btn">
+                        ⚡ Force Update
+                    </button>
+                </div>
+                
+                <div class="cache-strategy">
+                    <h4>📋 Cache Strategy</h4>
+                    <ul>
+                        <li><strong>Critical Files:</strong> Cached for 1 hour, then refreshed</li>
+                        <li><strong>Static Assets:</strong> Cached for 24 hours</li>
+                        <li><strong>External Resources:</strong> Cached for 7 days</li>
+                        <li><strong>API Responses:</strong> Always fetch fresh data</li>
+                    </ul>
+                </div>
+            </div>
 
             <!-- User Management -->
             <div class="card user-management">
@@ -1253,6 +1369,12 @@
             
             try {
                 dashboard = new AdminDashboard();
+                
+                // Initialize cache information
+                setTimeout(() => {
+                    refreshCacheInfo();
+                }, 1000);
+                
             } catch (error) {
                 console.error('❌ Failed to initialize admin dashboard:', error);
                 
@@ -1297,6 +1419,86 @@
                 console.log('✅ Data refresh initiated');
             } else {
                 console.error('❌ Dashboard not available for refresh');
+            }
+        }
+
+        // Cache Management Functions
+        async function refreshCacheInfo() {
+            const cacheInfoDiv = document.getElementById('cacheInfo');
+            
+            try {
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    let totalSize = 0;
+                    let cacheDetails = [];
+                    
+                    for (const cacheName of cacheNames) {
+                        const cache = await caches.open(cacheName);
+                        const keys = await cache.keys();
+                        cacheDetails.push({
+                            name: cacheName,
+                            items: keys.length,
+                            urls: keys.map(req => req.url)
+                        });
+                    }
+                    
+                    const swRegistration = await navigator.serviceWorker.getRegistration();
+                    const swStatus = swRegistration ? 
+                        (swRegistration.active ? 'Active' : 'Installing') : 'Not registered';
+                    
+                    cacheInfoDiv.innerHTML = `
+                        <div class="cache-status">
+                            <h4>📊 Cache Status</h4>
+                            <p><strong>Service Worker:</strong> ${swStatus}</p>
+                            <p><strong>Active Caches:</strong> ${cacheNames.length}</p>
+                            ${cacheDetails.map(cache => `
+                                <div class="cache-detail">
+                                    <strong>${cache.name}:</strong> ${cache.items} items
+                                </div>
+                            `).join('')}
+                            <p class="cache-update-time"><em>Last checked: ${new Date().toLocaleString()}</em></p>
+                        </div>
+                    `;
+                } else {
+                    cacheInfoDiv.innerHTML = '<p>⚠️ Cache API not supported in this browser</p>';
+                }
+            } catch (error) {
+                console.error('Error getting cache info:', error);
+                cacheInfoDiv.innerHTML = '<p>❌ Error loading cache information</p>';
+            }
+        }
+        
+        async function clearAppCache() {
+            if (confirm('⚠️ This will clear all cached data and force a reload. Continue?')) {
+                try {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    
+                    // Also unregister service worker
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map(reg => reg.unregister()));
+                    
+                    alert('✅ Cache cleared successfully! The page will reload.');
+                    window.location.reload(true);
+                } catch (error) {
+                    console.error('Error clearing cache:', error);
+                    alert('❌ Error clearing cache. Please try manual refresh.');
+                }
+            }
+        }
+        
+        async function updateServiceWorker() {
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    await registration.update();
+                    alert('🔄 Service Worker update initiated. Changes will take effect on next page load.');
+                } else {
+                    alert('⚠️ No Service Worker registration found');
+                }
+            } catch (error) {
+                console.error('Error updating service worker:', error);
+                alert('❌ Error updating Service Worker');
             }
         }
 

@@ -2704,12 +2704,136 @@ document.addEventListener('DOMContentLoaded', () => {
             navigator.serviceWorker.register('/sw.js')
                 .then((registration) => {
                     console.log('Service Worker registered successfully:', registration.scope);
+                    
+                    // Check for updates every 30 minutes
+                    setInterval(() => {
+                        registration.update();
+                    }, 30 * 60 * 1000);
+                    
+                    // Listen for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New content is available, show update notification
+                                showUpdateNotification();
+                            }
+                        });
+                    });
                 })
                 .catch((error) => {
                     console.log('Service Worker registration failed:', error);
                 });
+                
+            // Listen for messages from service worker
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'SW_UPDATED') {
+                    showUpdateNotification();
+                }
+            });
         });
     }
+    
+    // Function to show update notification
+    function showUpdateNotification() {
+        // Create a subtle notification bar
+        const notification = document.createElement('div');
+        notification.id = 'update-notification';
+        notification.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-align: center;
+                padding: 12px;
+                z-index: 10000;
+                font-family: 'Inter', sans-serif;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            ">
+                <span>🎉 New version available! </span>
+                <button onclick="location.reload()" style="
+                    background: rgba(255,255,255,0.2);
+                    border: 1px solid rgba(255,255,255,0.3);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    margin-left: 10px;
+                    font-family: inherit;
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+                   onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                    Refresh Now
+                </button>
+                <button onclick="document.getElementById('update-notification').remove()" style="
+                    background: none;
+                    border: none;
+                    color: white;
+                    padding: 8px;
+                    cursor: pointer;
+                    margin-left: 10px;
+                    font-size: 16px;
+                " title="Dismiss">×</button>
+            </div>
+        `;
+        
+        // Remove any existing notification
+        const existing = document.getElementById('update-notification');
+        if (existing) existing.remove();
+        
+        document.body.appendChild(notification);
+        
+        // Auto-hide after 30 seconds
+        setTimeout(() => {
+            const notif = document.getElementById('update-notification');
+            if (notif) notif.remove();
+        }, 30000);
+    }
+    
+    // Utility function to clear cache and reload fresh content
+    window.clearCacheAndReload = async function() {
+        if ('serviceWorker' in navigator && 'caches' in window) {
+            try {
+                // Get all cache names
+                const cacheNames = await caches.keys();
+                
+                // Delete all caches
+                await Promise.all(
+                    cacheNames.map(cacheName => caches.delete(cacheName))
+                );
+                
+                // Unregister service worker
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(
+                    registrations.map(registration => registration.unregister())
+                );
+                
+                console.log('Cache cleared and service worker unregistered');
+                
+                // Show success message and reload
+                alert('Cache cleared! The page will now reload with fresh content.');
+                window.location.reload(true);
+                
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                alert('Failed to clear cache. Please try refreshing manually.');
+            }
+        } else {
+            // Fallback for browsers without service worker support
+            window.location.reload(true);
+        }
+    };
+    
+    // Add keyboard shortcut Ctrl+Shift+R for force refresh
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+            e.preventDefault();
+            window.clearCacheAndReload();
+        }
+    });
 });
 
 // ================================
