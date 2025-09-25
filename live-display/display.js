@@ -10,12 +10,22 @@ class LiveDisplay {
         this.refreshTimer = null;
         this.timeUpdateTimer = null;
         this.lastUpdateTime = null;
+        this.lastRefreshTime = null; // For validating refresh intervals
         this.isInitialized = false;
         this.activityFeed = [];
         this.maxActivityItems = 20;
         this.lastDataHash = null; // For detecting actual data changes
         
         this.init();
+    }
+
+    // Helper function to format time without seconds
+    formatTimeWithoutSeconds(date) {
+        return date.toLocaleTimeString([], { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: true 
+        });
     }
 
     async init() {
@@ -307,11 +317,21 @@ class LiveDisplay {
     startAutoRefresh() {
         this.stopAutoRefresh();
         console.log(`🔄 Starting auto-refresh with interval: ${this.refreshInterval}ms (${this.refreshInterval/1000} seconds)`);
-        console.log(`⏰ Next refresh scheduled for: ${new Date(Date.now() + this.refreshInterval).toLocaleTimeString()}`);
+        console.log(`⏰ Next refresh scheduled for: ${this.formatTimeWithoutSeconds(new Date(Date.now() + this.refreshInterval))}`);
         
         this.refreshTimer = setInterval(() => {
-            console.log('🔄 Auto-refresh triggered at:', new Date().toLocaleTimeString());
-            console.log(`⏰ Next refresh scheduled for: ${new Date(Date.now() + this.refreshInterval).toLocaleTimeString()}`);
+            const now = new Date();
+            console.log('🔄 Auto-refresh triggered at:', this.formatTimeWithoutSeconds(now));
+            console.log(`⏰ Next refresh scheduled for: ${this.formatTimeWithoutSeconds(new Date(Date.now() + this.refreshInterval))}`);
+            
+            // Validation: Log actual interval timing
+            if (this.lastRefreshTime) {
+                const actualInterval = now.getTime() - this.lastRefreshTime.getTime();
+                const intervalDiff = Math.abs(actualInterval - this.refreshInterval);
+                console.log(`✅ Refresh interval validation: Expected ${this.refreshInterval}ms, Actual ${actualInterval}ms (diff: ${intervalDiff}ms)`);
+            }
+            this.lastRefreshTime = now;
+            
             this.loadData();
         }, this.refreshInterval);
         console.log('✅ Auto-refresh timer started with ID:', this.refreshTimer);
@@ -328,7 +348,7 @@ class LiveDisplay {
             console.log('💗 Auto-refresh heartbeat:', {
                 timerActive: !!this.refreshTimer,
                 timerId: this.refreshTimer,
-                lastUpdate: this.lastUpdateTime ? this.lastUpdateTime.toLocaleTimeString() : 'never',
+                lastUpdate: this.lastUpdateTime ? this.formatTimeWithoutSeconds(this.lastUpdateTime) : 'never',
                 timeSinceLastUpdate: typeof timeSinceLastUpdate === 'number' ? 
                     `${Math.round(timeSinceLastUpdate)}s ago` : timeSinceLastUpdate,
                 pageVisible: !document.hidden
@@ -365,7 +385,7 @@ class LiveDisplay {
     updateTimeDisplay() {
         // Show the last data refresh time instead of constantly updating current time
         const timeString = this.lastUpdateTime ? 
-            this.lastUpdateTime.toLocaleTimeString() : 
+            this.formatTimeWithoutSeconds(this.lastUpdateTime) : 
             '--:--';
         const element = document.getElementById('lastUpdate');
         if (element) {
@@ -380,7 +400,7 @@ class LiveDisplay {
 
     async loadData() {
         try {
-            console.log('🔄 Loading data at:', new Date().toLocaleTimeString());
+            console.log('🔄 Loading data at:', this.formatTimeWithoutSeconds(new Date()));
             console.log('🔄 Auto-refresh interval: 30 seconds');
             this.showRefreshIndicators();
             
@@ -1254,7 +1274,7 @@ class LiveDisplay {
                     <small style="color: #666; margin-top: 10px; display: block;">
                         Debug: Supabase ${typeof SupabaseHelper !== 'undefined' ? 'available' : 'unavailable'}<br>
                         LocalStorage activities: ${JSON.parse(localStorage.getItem('stepTrackerActivities') || '[]').length}<br>
-                        Last checked: ${new Date().toLocaleTimeString()}
+                        Last checked: ${this.formatTimeWithoutSeconds(new Date())}
                     </small>
                 </div>
             `;
