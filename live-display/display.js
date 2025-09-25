@@ -53,6 +53,31 @@ class LiveDisplay {
             this.isInitialized = true;
             
             console.log('✅ Live Display initialized successfully with Supabase-first architecture');
+            
+            // Add debug functions to window for console access
+            window.liveDisplayDebug = {
+                checkTimer: () => {
+                    console.log('🔍 Timer Status:', {
+                        timerActive: !!this.refreshTimer,
+                        timerId: this.refreshTimer,
+                        lastUpdateTime: this.lastUpdateTime ? this.formatTimeWithoutSeconds(this.lastUpdateTime) : 'Never',
+                        lastRefreshTime: this.lastRefreshTime ? this.formatTimeWithoutSeconds(this.lastRefreshTime) : 'Never',
+                        timeSinceLastRefresh: this.lastRefreshTime ? 
+                            `${Math.floor((Date.now() - this.lastRefreshTime.getTime()) / 1000)}s ago` : 'Never',
+                        pageVisible: !document.hidden,
+                        refreshInterval: `${this.refreshInterval}ms (${this.refreshInterval/1000}s)`
+                    });
+                },
+                restartTimer: () => {
+                    console.log('🔄 Manually restarting auto-refresh timer');
+                    this.startAutoRefresh();
+                },
+                triggerRefresh: () => {
+                    console.log('🔄 Manually triggering refresh');
+                    this.loadData();
+                }
+            };
+            
         } catch (error) {
             console.error('❌ Failed to initialize live display:', error);
             this.showError('Failed to initialize display', error.message);
@@ -183,10 +208,17 @@ class LiveDisplay {
         // Handle window focus for auto-refresh
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                console.log('📱 Window became visible, refreshing data and restarting auto-refresh');
-                this.loadData();
-                // Restart auto-refresh to ensure it's still running
-                this.startAutoRefresh();
+                console.log('📱 Window became visible, checking auto-refresh status');
+                
+                // Only restart if timer is not running
+                if (!this.refreshTimer) {
+                    console.log('📱 Timer was stopped, restarting auto-refresh');
+                    this.loadData();
+                    this.startAutoRefresh();
+                } else {
+                    console.log('📱 Timer still active, just refreshing data');
+                    this.loadData();
+                }
             } else {
                 console.log('📱 Window became hidden');
             }
@@ -287,8 +319,13 @@ class LiveDisplay {
             console.log('Manual refresh triggered...');
             await this.loadData();
             
-            // Restart auto-refresh timer after manual refresh
-            this.startAutoRefresh();
+            // Only restart auto-refresh timer if it's not already running
+            if (!this.refreshTimer) {
+                console.log('🔄 Auto-refresh timer was stopped, restarting after manual refresh');
+                this.startAutoRefresh();
+            } else {
+                console.log('🔄 Auto-refresh timer still active, no restart needed');
+            }
             
             // Show brief success feedback
             if (refreshBtn) {
@@ -336,10 +373,49 @@ class LiveDisplay {
         }, this.refreshInterval);
         console.log('✅ Auto-refresh timer started with ID:', this.refreshTimer);
         
-        // Add immediate test to confirm timer is working
+        // Add immediate test to confirm timer is working (10 seconds)
         setTimeout(() => {
-            console.log('🧪 Auto-refresh test: Timer is active and working');
-        }, 5000); // Test after 5 seconds
+            console.log('🧪 Auto-refresh 10-second test: Timer should be active');
+            console.log('🧪 Timer status:', {
+                timerActive: !!this.refreshTimer,
+                timerId: this.refreshTimer,
+                pageVisible: !document.hidden,
+                timeUntilNextRefresh: this.lastRefreshTime ? 
+                    `${30 - Math.floor((Date.now() - this.lastRefreshTime.getTime()) / 1000)}s` : 'Not started yet'
+            });
+        }, 10000); // Test after 10 seconds
+        
+        // Add test at 25 seconds (5 seconds before next refresh)
+        setTimeout(() => {
+            console.log('🧪 Auto-refresh 25-second test: Next refresh in ~5 seconds');
+            console.log('🧪 Pre-refresh status:', {
+                timerActive: !!this.refreshTimer,
+                timerId: this.refreshTimer,
+                timeSinceLastRefresh: this.lastRefreshTime ? 
+                    `${Math.floor((Date.now() - this.lastRefreshTime.getTime()) / 1000)}s` : 'Never'
+            });
+        }, 25000); // Test after 25 seconds
+        
+        // Add test at 35 seconds (5 seconds after refresh should have happened)
+        setTimeout(() => {
+            console.log('🧪 Auto-refresh 35-second test: Checking if refresh occurred');
+            const wasRefreshTriggered = this.lastRefreshTime && 
+                (Date.now() - this.lastRefreshTime.getTime()) < 10000; // Within last 10 seconds
+            
+            console.log('🧪 Post-refresh check:', {
+                refreshWasTriggered: wasRefreshTriggered,
+                timerActive: !!this.refreshTimer,
+                timeSinceLastRefresh: this.lastRefreshTime ? 
+                    `${Math.floor((Date.now() - this.lastRefreshTime.getTime()) / 1000)}s` : 'Never',
+                expectedRefreshTime: this.formatTimeWithoutSeconds(new Date(Date.now() - 5000))
+            });
+            
+            if (!wasRefreshTriggered) {
+                console.error('❌ AUTO-REFRESH FAILED! Timer did not execute after 30 seconds');
+                console.log('🔧 Attempting to restart timer...');
+                this.startAutoRefresh();
+            }
+        }, 35000); // Test after 35 seconds
         
         // Add heartbeat check every 60 seconds to verify refresh is still working
         setInterval(() => {
