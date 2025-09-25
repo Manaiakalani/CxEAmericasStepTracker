@@ -2387,6 +2387,9 @@ class StepTracker {
             
             // Focus management for accessibility
             flyout.focus();
+            
+            // Add mobile touch prevention for better UX
+            this.addMobileTouchPrevention();
         }
     }
 
@@ -2395,18 +2398,31 @@ class StepTracker {
         
         flyout.classList.remove('open');
         document.body.style.overflow = 'auto';
+        
+        // Remove mobile touch prevention
+        this.removeMobileTouchPrevention();
     }
 
     addMobileTouchPrevention() {
         const handleTouchMove = (e) => {
             const flyout = document.getElementById('hamburgerFlyout');
-            if (!flyout.contains(e.target)) {
+            const flyoutContent = document.querySelector('.flyout-content');
+            
+            // Allow scrolling within the flyout content, prevent scrolling outside
+            if (!flyoutContent || !flyoutContent.contains(e.target)) {
                 e.preventDefault();
             }
         };
         
         document.addEventListener('touchmove', handleTouchMove, { passive: false });
         this._touchMoveHandler = handleTouchMove;
+    }
+    
+    removeMobileTouchPrevention() {
+        if (this._touchMoveHandler) {
+            document.removeEventListener('touchmove', this._touchMoveHandler);
+            this._touchMoveHandler = null;
+        }
     }
 
     removeMobileTouchPrevention() {
