@@ -3,7 +3,8 @@ class StepTracker {
     constructor() {
         try {
             this.currentUser = null;
-            this.users = JSON.parse(localStorage.getItem('stepTrackerUsers') || '[]');
+            // Initialize users array empty - will be populated from Supabase if available
+            this.users = [];
             
             // Prioritize Supabase as primary storage, localStorage as fallback only
             this.useSupabase = true; // Default to true, will be disabled if Supabase unavailable
@@ -32,11 +33,15 @@ class StepTracker {
                     console.log('📱 Supabase not available - falling back to localStorage');
                     this.useSupabase = false;
                     localStorage.setItem('stepTrackerUsesSupabase', 'false');
+                    // Load from localStorage only when Supabase is not available
+                    this.users = JSON.parse(localStorage.getItem('stepTrackerUsers') || '[]');
                 }
             } catch (supabaseError) {
                 console.warn('❌ Supabase initialization failed, falling back to localStorage:', supabaseError);
                 this.useSupabase = false;
                 localStorage.setItem('stepTrackerUsesSupabase', 'false');
+                // Load from localStorage only when Supabase fails
+                this.users = JSON.parse(localStorage.getItem('stepTrackerUsers') || '[]');
             }
             
             this.syncInProgress = false;
@@ -2850,15 +2855,18 @@ StepTracker.prototype.initSupabaseIntegration = async function() {
         const useSupabase = localStorage.getItem('stepTrackerUsesSupabase') === 'true';
         
         if (useSupabase) {
-            // Check if we have existing local data that needs to be synced
-            const hasLocalData = this.users.length > 0 || this.recentActivities.length > 0;
+            // ALWAYS load data from Supabase as primary source (Supabase-first approach)
+            console.log('🌐 Loading users and data from Supabase (primary source)...');
+            await this.loadDataFromSupabase();
             
-            if (hasLocalData) {
-                console.log('Found local data. Offering to sync to Supabase...');
+            // Check if we have any local-only data that needs to be synced
+            const localUsers = JSON.parse(localStorage.getItem('stepTrackerUsers') || '[]');
+            const localActivities = JSON.parse(localStorage.getItem('stepTrackerActivities') || '[]');
+            const hasLocalOnlyData = localUsers.length > 0 || localActivities.length > 0;
+            
+            if (hasLocalOnlyData) {
+                console.log('Found local-only data. Offering to sync to Supabase...');
                 this.showSupabaseSyncDialog();
-            } else {
-                // Load data from Supabase as primary source
-                await this.loadDataFromSupabase();
             }
             
             // Set up real-time subscriptions
