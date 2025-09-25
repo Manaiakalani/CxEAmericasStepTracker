@@ -905,20 +905,18 @@ class LiveDisplay {
         return formatted;
     }
 
-    // Test Supabase connection with a simple query
+    // Test Supabase connection using SupabaseHelper (more reliable)
     async testSupabaseConnection() {
         try {
-            // Simple connectivity test - try to get 1 user
-            const { data, error } = await supabase
-                .from('users')
-                .select('id')
-                .limit(1);
-            
-            if (error) {
-                throw new Error(`Supabase connection test failed: ${error.message}`);
+            // Use SupabaseHelper instead of direct supabase client access
+            if (typeof SupabaseHelper === 'undefined') {
+                throw new Error('SupabaseHelper is not available');
             }
             
-            console.log('✅ Supabase connection test passed');
+            // Test by getting users through SupabaseHelper
+            const users = await SupabaseHelper.getAllUsers();
+            
+            console.log('✅ Supabase connection test passed via SupabaseHelper');
             return true;
         } catch (error) {
             console.error('❌ Supabase connection test failed:', error);
