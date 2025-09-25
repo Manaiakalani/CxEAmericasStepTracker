@@ -198,15 +198,15 @@ class LiveDisplay {
                         console.log(`   ${i}: ${act.type} - "${act.description}" - ${act.timestamp}`);
                     });
                     
-                    // Try to add a test activity
-                    const testActivity = await SupabaseHelper.addActivity('test', 'Live display connection test - ' + new Date().toLocaleTimeString(), new Date().toISOString(), 'Live Display Test');
-                    console.log('✅ Successfully added test activity:', testActivity);
+                    // Try to add a test activity (DISABLED - no longer needed)
+                    // const testActivity = await SupabaseHelper.addActivity('test', 'Live display connection test - ' + new Date().toLocaleTimeString(), new Date().toISOString(), 'Live Display Test');
+                    // console.log('✅ Successfully added test activity:', testActivity);
                     
-                    // Wait a moment then refresh the display
-                    setTimeout(() => {
-                        console.log('🔄 Refreshing display after test activity...');
-                        this.loadData();
-                    }, 1000);
+                    // Wait a moment then refresh the display (DISABLED since test activity is disabled)
+                    // setTimeout(() => {
+                    //     console.log('🔄 Refreshing display after test activity...');
+                    //     this.loadData();
+                    // }, 1000);
                 } else {
                     console.error('❌ SupabaseHelper not available');
                 }
@@ -230,13 +230,13 @@ class LiveDisplay {
                         await SupabaseHelper.registerUser('Test User', 'Test Team', 10000);
                     }
                     
-                    // Always create a test activity
-                    const testMessage = `Test activity from live display at ${new Date().toLocaleTimeString()}`;
-                    await SupabaseHelper.addActivity('test', testMessage, new Date().toISOString(), 'Live Display Debug');
-                    console.log('✅ Test data created successfully');
+                    // Always create a test activity (DISABLED - no longer needed)
+                    // const testMessage = `Test activity from live display at ${new Date().toLocaleTimeString()}`;
+                    // await SupabaseHelper.addActivity('test', testMessage, new Date().toISOString(), 'Live Display Debug');
+                    // console.log('✅ Test data created successfully');
                     
-                    // Force reload after creating test data
-                    setTimeout(() => this.loadData(), 1000);
+                    // Force reload after creating test data (DISABLED since test activity is disabled)
+                    // setTimeout(() => this.loadData(), 1000);
                 }
             } catch (error) {
                 console.error('❌ Failed to create test data:', error);
@@ -553,14 +553,14 @@ class LiveDisplay {
                     if (supabaseUsers.length === 0 && activities.length === 0) {
                         console.warn('⚠️ No data in Supabase tables - might be a configuration issue');
                         
-                        // Test if we can write data to force creation
-                        try {
-                            console.log('🧪 Testing Supabase write capability...');
-                            const testActivity = await SupabaseHelper.addActivity('test', 'Live display connectivity test', new Date().toISOString());
-                            console.log('✅ Supabase write test successful:', testActivity);
-                        } catch (writeError) {
-                            console.error('❌ Supabase write test failed:', writeError);
-                        }
+                        // Test if we can write data to force creation (DISABLED - no longer needed)
+                        // try {
+                        //     console.log('🧪 Testing Supabase write capability...');
+                        //     const testActivity = await SupabaseHelper.addActivity('test', 'Live display connectivity test', new Date().toISOString());
+                        //     console.log('✅ Supabase write test successful:', testActivity);
+                        // } catch (writeError) {
+                        //     console.error('❌ Supabase write test failed:', writeError);
+                        // }
                     }
                     
                     // Convert Supabase users to the format expected by the display
