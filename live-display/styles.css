@@ -337,6 +337,90 @@ body {
     color: #fff;
 }
 
+/* The Stomp Widget - Compact Aggregate Steps Display */
+.stomp-widget {
+    margin-bottom: 2rem;
+}
+
+.stomp-card {
+    background: linear-gradient(135deg, 
+        var(--ms-blue) 0%, 
+        var(--ms-purple) 50%, 
+        var(--ms-teal) 100%);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 120, 212, 0.3),
+                0 4px 16px rgba(92, 45, 145, 0.2);
+    transform: translateZ(0);
+    will-change: transform;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 80px;
+}
+
+.stomp-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 120, 212, 0.4),
+                0 6px 20px rgba(92, 45, 145, 0.3);
+}
+
+.stomp-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stomp-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.stomp-title {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    min-width: 120px;
+}
+
+.stomp-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    letter-spacing: -1px;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.stomp-card.updating .stomp-number {
+    transform: scale(1.05);
+    text-shadow: 0 2px 20px rgba(255,255,255,0.3);
+}
+
+.stomp-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: auto;
+}
+
 /* Activity Feed */
 .activity-feed {
     background: var(--bg-card);
@@ -827,6 +911,38 @@ body {
         grid-template-columns: 1fr;
     }
     
+    /* The Stomp Mobile Styles */
+    .stomp-card {
+        padding: 1.25rem 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+        min-height: auto;
+        text-align: center;
+    }
+    
+    .stomp-content {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    
+    .stomp-title {
+        font-size: 1rem;
+        letter-spacing: 1.5px;
+        min-width: auto;
+    }
+    
+    .stomp-number {
+        font-size: 2rem;
+        letter-spacing: 0;
+    }
+    
+    .stomp-label {
+        font-size: 0.8rem;
+        margin-left: 0;
+        text-align: center;
+    }
+    
     .footer-content {
         flex-direction: column;
         gap: 1rem;
@@ -855,6 +971,28 @@ body {
     .update-indicator {
         font-size: 0.9rem;
         padding: 0.6rem 1.2rem;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .stomp-card {
+        padding: 1rem;
+    }
+    
+    .stomp-title {
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+    
+    .stomp-number {
+        font-size: 1.8rem;
+    }
+    
+    .stomp-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
     }
 }
 
