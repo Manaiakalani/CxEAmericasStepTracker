@@ -12,18 +12,8 @@
     --ms-blue-dark: #106ebe;
     --ms-blue-light: #40e0d0;
     --ms-green: #107c10;
-    --ms-orange: #ff8c00.leaderboard-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border-radius: 12px;
-    margin-bottom: 0.5rem;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    will-change: transform, opacity;
-    transform: translateZ(0); /* Hardware acceleration */
-}red: #d13438;
+    --ms-orange: #ff8c00;
+    --ms-red: #d13438;
     --ms-purple: #5c2d91;
     --ms-teal: #008272;
     
