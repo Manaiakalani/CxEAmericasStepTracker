@@ -869,6 +869,24 @@ class LiveDisplay {
             const completedChallenges = this.calculateCompletedChallenges(users);
             console.log(`  - Completed challenges: ${completedChallenges}`);
 
+            // Calculate "The Stomp" - Aggregate steps for entire offsite period
+            console.log('🔥 Calculating THE STOMP - aggregate offsite steps...');
+            const totalOffsiteSteps = users.reduce((sum, user) => {
+                // Sum all steps from all recorded days for each user
+                let userTotalSteps = 0;
+                if (user.steps && typeof user.steps === 'object') {
+                    Object.values(user.steps).forEach(dailySteps => {
+                        if (typeof dailySteps === 'number' && dailySteps > 0) {
+                            userTotalSteps += dailySteps;
+                        }
+                    });
+                }
+                console.log(`  ${user.name}: ${userTotalSteps} total offsite steps`);
+                return sum + userTotalSteps;
+            }, 0);
+            
+            console.log(`🔥 THE STOMP - Total offsite steps: ${totalOffsiteSteps}`);
+
             // Create individual leaderboard based on today's steps
             console.log('🏆 Creating individual leaderboard...');
             const individualLeaderboard = users
@@ -952,6 +970,7 @@ class LiveDisplay {
             const returnData = {
                 stats: {
                     totalSteps,
+                    totalOffsiteSteps,
                     totalParticipants,
                     activeTeams,
                     averageSteps,
@@ -1248,6 +1267,9 @@ class LiveDisplay {
         this.updateStatCard('totalUsers', stats.totalParticipants?.toString() || '0');
         this.updateStatCard('totalSteps', stats.totalSteps?.toLocaleString() || '0');
         this.updateStatCard('completedChallenges', stats.completedChallenges?.toString() || '0');
+        
+        // Update The Stomp display
+        this.updateStompDisplay(stats.totalOffsiteSteps || 0, stats.totalParticipants || 0);
     }
 
     updateStatCard(id, value) {
@@ -1261,6 +1283,26 @@ class LiveDisplay {
                     setTimeout(() => card.classList.remove('updating'), 300);
                 }
             });
+        }
+    }
+
+    updateStompDisplay(totalOffsiteSteps, totalParticipants) {
+        console.log(`🔥 Updating THE STOMP display: ${totalOffsiteSteps} steps, ${totalParticipants} participants`);
+        
+        const stompNumber = document.getElementById('totalOffsiteSteps');
+        const stompCard = document.querySelector('.stomp-card');
+        
+        if (stompNumber) {
+            const formattedSteps = totalOffsiteSteps.toLocaleString();
+            if (stompNumber.textContent !== formattedSteps) {
+                requestAnimationFrame(() => {
+                    stompNumber.textContent = formattedSteps;
+                    if (stompCard) {
+                        stompCard.classList.add('updating');
+                        setTimeout(() => stompCard.classList.remove('updating'), 500);
+                    }
+                });
+            }
         }
     }
 
