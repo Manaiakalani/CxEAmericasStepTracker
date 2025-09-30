@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### 🚨 **CRITICAL FIXES**
+- **URGENT**: Fixed users having to create new accounts on every page refresh
+- **URGENT**: Eliminated old cached content issues by forcing Supabase-only mode
+- **URGENT**: Prevented localStorage cache conflicts with fresh Supabase data
+- **CRITICAL**: Fixed broken "Edit Steps" functionality in admin dashboard
+
 ### ✨ Added
 - Complete User Merge functionality with preview and safety confirmations
 - Smart Auto-Merge for automatic duplicate user resolution
