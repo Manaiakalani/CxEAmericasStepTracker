@@ -771,11 +771,22 @@
                     <button class="btn btn-secondary" onclick="forceRefreshUsers()">💨 Force Refresh</button>
                 </div>
                 
+                <!-- Advanced User Actions -->
+                <div class="action-section">
+                    <h3>🔧 Advanced User Actions</h3>
+                    <div class="action-row">
+                        <button class="btn btn-secondary" onclick="showMergeOptions()">🔄 Merge Users</button>
+                        <button class="btn btn-secondary" onclick="scanForDuplicates()">🔍 Find Duplicates</button>
+                        <button class="btn btn-secondary" onclick="showManualStepsForm()">📊 Manual Steps</button>
+                        <button class="btn btn-secondary" onclick="smartMergeDuplicates()">🤖 Smart Merge</button>
+                    </div>
+                </div>
+                
                 <!-- Add User Form -->
                 <div id="addUserForm" class="add-user-form" style="display: none;">
                     <h3>Add New User</h3>
-                    <input type="text" id="newUserName" placeholder="User Name" required>
-                    <select id="newUserTeam" required>
+                    <input type="text" id="userName" placeholder="User Name" required>
+                    <select id="userTeam" required>
                         <option value="">Select Team</option>
                         <option value="Engineering">Engineering</option>
                         <option value="Marketing">Marketing</option>
@@ -786,10 +797,82 @@
                         <option value="Product">Product</option>
                         <option value="Design">Design</option>
                     </select>
-                    <input type="number" id="newUserGoal" placeholder="Daily Step Goal" min="1000" max="50000" value="10000">
+                    <input type="number" id="userGoal" placeholder="Daily Step Goal" min="1000" max="50000" value="10000">
                     <div style="margin-top: 15px;">
-                        <button class="btn" onclick="addNewUser()">✅ Add User</button>
+                        <button class="btn" onclick="addUser()">✅ Add User</button>
                         <button class="btn btn-secondary" onclick="hideAddUserForm()">❌ Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Manual Steps Form -->
+                <div id="manualStepsForm" class="add-user-form" style="display: none;">
+                    <h3>📊 Edit User Steps</h3>
+                    <div class="form-group">
+                        <label for="stepUserId">Select User:</label>
+                        <select id="stepUserId" required>
+                            <option value="">Select a user...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualSteps">Add Steps:</label>
+                        <input type="number" id="manualSteps" placeholder="Enter number of steps to add" min="1" max="50000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stepReason">Reason (optional):</label>
+                        <input type="text" id="stepReason" placeholder="Reason for adding steps" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="updateToday" checked> 
+                            Update today's activity date
+                        </label>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" onclick="addManualSteps()">✅ Add Steps</button>
+                        <button class="btn btn-secondary" onclick="hideManualStepsForm()">❌ Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Merge Users Form -->
+                <div id="mergeUsersForm" class="add-user-form" style="display: none;">
+                    <h3>🔄 Merge Users</h3>
+                    <p style="color: #dc2626; font-size: 14px; margin-bottom: 15px;">
+                        ⚠️ Warning: This action will permanently combine two user accounts and cannot be undone!
+                    </p>
+                    <div class="form-group">
+                        <label for="mergeSourceUser">Source User (will be deleted):</label>
+                        <select id="mergeSourceUser" required>
+                            <option value="">Select user to merge from...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mergeTargetUser">Target User (will keep this account):</label>
+                        <select id="mergeTargetUser" required>
+                            <option value="">Select user to merge into...</option>
+                        </select>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="previewMerge()">👁️ Preview Merge</button>
+                        <button class="btn btn-secondary" onclick="hideMergeUsersForm()">❌ Cancel</button>
+                    </div>
+                    
+                    <!-- Merge Preview -->
+                    <div id="mergePreview" style="display: none; margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <h4>Merge Preview:</h4>
+                        <div id="mergePreviewContent"></div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-danger" onclick="executeMerge()">⚠️ Execute Merge</button>
+                            <button class="btn btn-secondary" onclick="hideMergePreview()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duplicate Detection Results -->
+                <div id="duplicateResults" style="display: none; margin-top: 20px; padding: 15px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+                    <h4>🔍 Duplicate Detection Results</h4>
+                    <div id="duplicateResultsContent"></div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="hideDuplicateResults()">Close</button>
                     </div>
                 </div>
 
@@ -1014,6 +1097,7 @@
                                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                                 <td class="action-buttons">
                                     <button class="btn btn-small" onclick="showEditStepsModal('${user.id}', '${user.name}', ${user.total_steps || 0})">📊 Edit Steps</button>
+                                    <button class="btn btn-small btn-secondary" onclick="showMergeForUser('${user.id}', '${user.name}')">🔄 Merge</button>
                                     <button class="btn btn-small btn-danger" onclick="deleteUser('${user.id}', '${user.name}')">Delete</button>
                                 </td>
                             </tr>
@@ -1630,6 +1714,10 @@
             document.getElementById('mergePreview').style.display = 'none';
         }
 
+        function hideMergePreview() {
+            document.getElementById('mergePreview').style.display = 'none';
+        }
+
         function hideDuplicateResults() {
             document.getElementById('duplicateResults').style.display = 'none';
         }
@@ -1909,11 +1997,97 @@
             }
         }
 
+        async function smartMergeDuplicates() {
+            if (!confirm('🤖 Smart Merge will automatically merge users with identical names.\n\nThis will:\n• Find users with identical names (case-insensitive)\n• Combine their steps automatically\n• Keep the account with more total steps\n• Delete duplicate accounts\n\nProceed with automatic merge?')) {
+                return;
+            }
+
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                const nameGroups = {};
+                let mergeCount = 0;
+                
+                // Group users by name (case-insensitive)
+                users.forEach(user => {
+                    const normalizedName = user.name.toLowerCase().trim();
+                    if (!nameGroups[normalizedName]) {
+                        nameGroups[normalizedName] = [];
+                    }
+                    nameGroups[normalizedName].push(user);
+                });
+                
+                // Find groups with duplicates
+                const duplicateGroups = Object.values(nameGroups).filter(group => group.length > 1);
+                
+                if (duplicateGroups.length === 0) {
+                    alert('✅ No exact duplicate names found!\n\nAll users have unique names.');
+                    return;
+                }
+                
+                // Show preview before processing
+                const previewText = duplicateGroups.map(group => 
+                    `• ${group[0].name}: ${group.length} accounts (${group.map(u => u.total_steps || 0).join(', ')} steps)`
+                ).join('\n');
+                
+                if (!confirm(`Found ${duplicateGroups.length} duplicate name groups:\n\n${previewText}\n\nProceed with automatic merge?`)) {
+                    return;
+                }
+                
+                // Process each duplicate group
+                for (const group of duplicateGroups) {
+                    // Sort by total steps (descending) to keep the account with most steps
+                    group.sort((a, b) => (b.total_steps || 0) - (a.total_steps || 0));
+                    
+                    const targetUser = group[0]; // Keep this one (most steps)
+                    const sourceUsers = group.slice(1); // Merge these into target
+                    
+                    // Calculate combined steps and best goal
+                    const combinedSteps = group.reduce((sum, user) => sum + (user.total_steps || 0), 0);
+                    const bestGoal = Math.max(...group.map(user => user.daily_goal || 10000));
+                    
+                    // Update target user with combined data
+                    await SupabaseHelper.updateUser(targetUser.id, {
+                        total_steps: combinedSteps,
+                        daily_goal: bestGoal,
+                        last_active_date: new Date().toISOString().split('T')[0]
+                    });
+                    
+                    // Delete source users
+                    for (const sourceUser of sourceUsers) {
+                        await SupabaseHelper.deleteUser(sourceUser.id);
+                        mergeCount++;
+                    }
+                    
+                    console.log(`✅ Merged ${sourceUsers.length} duplicates into ${targetUser.name}`);
+                }
+                
+                alert(`✅ Smart Merge completed successfully!\n\nMerged ${mergeCount} duplicate accounts into ${duplicateGroups.length} primary accounts.\n\nRefreshing user list...`);
+                
+                // Refresh the user list
+                await dashboard.loadUsers(true);
+                await dashboard.loadStatistics();
+                
+            } catch (error) {
+                console.error('Error in smart merge:', error);
+                alert(`❌ Smart Merge failed: ${error.message}`);
+            }
+        }
+
         function showEditStepsModal(userId, userName, currentSteps) {
             showManualStepsForm();
             document.getElementById('stepUserId').value = userId;
             document.getElementById('manualSteps').placeholder = `Current: ${currentSteps.toLocaleString()} steps`;
             document.getElementById('stepReason').value = `Manual edit for ${userName}`;
+        }
+
+        function showMergeForUser(userId, userName) {
+            showMergeOptions();
+            // Pre-select this user as the source (to be merged FROM)
+            setTimeout(() => {
+                document.getElementById('mergeSourceUser').value = userId;
+                // Focus on target selection
+                document.getElementById('mergeTargetUser').focus();
+            }, 100);
         }
 
         function refreshSystemDiagnostics() {
