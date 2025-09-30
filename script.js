@@ -23,6 +23,14 @@ class StepTracker {
                     localStorage.setItem('stepTrackerUsesSupabase', 'true');
                     this.isSupabaseForced = true;
                     
+                    // CRITICAL FIX: Clear any localStorage cache to force fresh Supabase data
+                    console.log('🧹 Clearing localStorage cache to ensure fresh data from Supabase');
+                    localStorage.removeItem('stepTrackerUsers');
+                    localStorage.removeItem('stepTrackerActivities');
+                    
+                    // Initialize empty users array - will be populated from Supabase
+                    this.users = [];
+                    
                     // Test Supabase connection
                     SupabaseHelper.testConnection().then(() => {
                         console.log('✅ Supabase connection verified');
@@ -1389,7 +1397,39 @@ class StepTracker {
             tab.style.display = 'none';
         });
         
-        // Check if there are existing users
+        // CRITICAL FIX: If using Supabase and users array is empty, wait for data to load
+        if (this.useSupabase && (!this.users || this.users.length === 0)) {
+            console.log('⏳ Waiting for Supabase data to load before showing user selection...');
+            
+            // Show loading message
+            const existingUserSection = document.getElementById('existingUserSection');
+            const registrationSection = document.getElementById('registrationSection');
+            
+            if (existingUserSection) {
+                existingUserSection.innerHTML = '<div style="text-align: center; padding: 20px;">🔄 Loading users from cloud...</div>';
+                existingUserSection.style.display = 'block';
+            }
+            if (registrationSection) {
+                registrationSection.style.display = 'none';
+            }
+            
+            // Wait for data to load, then show proper screen
+            const checkDataLoaded = () => {
+                if (this.users && this.users.length > 0) {
+                    console.log('✅ Supabase data loaded, showing user selection');
+                    this.showUserSelection();
+                } else {
+                    // Keep checking every 500ms for up to 10 seconds
+                    setTimeout(checkDataLoaded, 500);
+                }
+            };
+            
+            // Start checking after a brief delay
+            setTimeout(checkDataLoaded, 1000);
+            return;
+        }
+        
+        // Check if there are existing users (standard logic)
         if (this.users && this.users.length > 0) {
             this.showUserSelection();
         } else {
@@ -1961,7 +2001,13 @@ class StepTracker {
     }
 
     saveData() {
-        // Optimized debounced save with memory cleanup
+        // CRITICAL FIX: Don't save to localStorage when using Supabase to prevent cache issues
+        if (this.useSupabase) {
+            console.log('🌐 Using Supabase - skipping localStorage save to prevent cache conflicts');
+            return;
+        }
+        
+        // Optimized debounced save with memory cleanup (only for non-Supabase mode)
         this.debouncedSave = this.debouncedSave || this.debounce(() => {
             try {
                 // Cleanup old data before saving
