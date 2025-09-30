@@ -1,6 +1,24 @@
-# 🚀 Enhanced Admin Dashboard: Fix Edit Steps + Add User Merge Functionality
+# � CRITICAL FIXES + Enhanced Admin Dashboard: Fix Edit Steps + Add User Merge Functionality
 
-## 🎯 Problem Statement
+## 🚨 **URGENT CACHE FIX** (Latest Update)
+**Users reporting old cached content and having to create new users on each page refresh**
+
+### Root Cause Identified:
+- App was loading stale localStorage data before fresh Supabase data
+- `saveData()` was writing to localStorage even when using Supabase  
+- Welcome screen showed cached users instead of waiting for fresh data
+
+### ✅ **Critical Fix Applied:**
+- **Clear localStorage cache** when Supabase is detected
+- **Prevent localStorage writes** when using Supabase mode
+- **Force welcome screen** to wait for fresh Supabase data
+- **Eliminate cache conflicts** between localStorage and Supabase
+
+**Result: Users now always see fresh data and don't need to re-register!**
+
+---
+
+## 🎯 Original Problem Statement
 The admin dashboard had a critical bug where clicking "Edit Steps" did nothing due to missing HTML form elements. Additionally, the system lacked proper user management capabilities for handling duplicate users and merging accounts.
 
 ## ✅ Solutions Implemented
