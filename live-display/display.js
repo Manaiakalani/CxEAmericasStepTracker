@@ -560,6 +560,7 @@ class LiveDisplay {
                     
                     this.updateStats(data.stats);
                     this.updateLeaderboards(data.leaderboards);
+                    this.updateWeeklyChampion(data.weeklyChampion);
                     this.updateActivityFeed(data.activities);
                     this.lastDataHash = dataHash;
                     this.lastUpdateTime = new Date();
@@ -582,6 +583,7 @@ class LiveDisplay {
                     completedChallenges: 0
                 });
                 this.updateLeaderboards({ individual: [], team: [] });
+                this.updateWeeklyChampion(null);
                 this.updateActivityFeed([]);
                 
                 // Update connection status
@@ -872,16 +874,9 @@ class LiveDisplay {
             // Calculate "The Stomp" - Aggregate steps for entire offsite period
             console.log('🔥 Calculating THE STOMP - aggregate offsite steps...');
             const totalOffsiteSteps = users.reduce((sum, user) => {
-                // Sum all steps from all recorded days for each user
-                let userTotalSteps = 0;
-                if (user.steps && typeof user.steps === 'object') {
-                    Object.values(user.steps).forEach(dailySteps => {
-                        if (typeof dailySteps === 'number' && dailySteps > 0) {
-                            userTotalSteps += dailySteps;
-                        }
-                    });
-                }
-                console.log(`  ${user.name}: ${userTotalSteps} total offsite steps`);
+                // Use the total_steps field which contains the cumulative steps for each user
+                const userTotalSteps = user.total_steps || 0;
+                console.log(`  ${user.name}: ${userTotalSteps} total steps`);
                 return sum + userTotalSteps;
             }, 0);
             
@@ -957,6 +952,16 @@ class LiveDisplay {
                 
             console.log('👥 Final team leaderboard:', teamLeaderboard);
 
+            // Calculate weekly champion (overall top individual by total steps)
+            console.log('👑 Calculating weekly champion...');
+            const weeklyChampion = users.length > 0 ? users.reduce((champion, user) => {
+                const userTotalSteps = user.total_steps || 0;
+                const championTotalSteps = champion.total_steps || 0;
+                return userTotalSteps > championTotalSteps ? user : champion;
+            }) : null;
+            
+            console.log('👑 Weekly champion:', weeklyChampion);
+
             // Ensure activities are sorted by timestamp descending (newest first) 
             // regardless of data source (Supabase or localStorage)
             activities = activities.sort((a, b) => {
@@ -980,6 +985,7 @@ class LiveDisplay {
                     individual: individualLeaderboard,
                     team: teamLeaderboard
                 },
+                weeklyChampion: weeklyChampion,
                 activities: recentActivities
             };
 
@@ -1313,6 +1319,68 @@ class LiveDisplay {
         
         this.updateIndividualLeaderboard(leaderboards.individual);
         this.updateTeamLeaderboard(leaderboards.team);
+    }
+
+    updateWeeklyChampion(champion) {
+        console.log('=== updateWeeklyChampion called ===');
+        console.log('Weekly champion data:', champion);
+        
+        const container = document.getElementById('weeklyChampion');
+        if (!container) {
+            console.error('Weekly champion container not found!');
+            return;
+        }
+        
+        if (!champion) {
+            console.log('No weekly champion data available');
+            container.innerHTML = `
+                <div class="leaderboard-item empty-state">
+                    <div class="empty-message">
+                        <i class="fas fa-crown"></i>
+                        <p>No champion data available yet. Start tracking steps!</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        const totalSteps = champion.total_steps || 0;
+        
+        // Determine achievement level
+        let achievementText = '';
+        let achievementClass = '';
+        
+        if (totalSteps >= 100000) {
+            achievementText = '🎉 LEGENDARY CHAMPION!';
+            achievementClass = 'legendary';
+        } else if (totalSteps >= 75000) {
+            achievementText = '🌟 INCREDIBLE ACHIEVEMENT!';
+            achievementClass = 'incredible';
+        } else if (totalSteps >= 50000) {
+            achievementText = '💪 OUTSTANDING PERFORMANCE!';
+            achievementClass = 'outstanding';
+        } else if (totalSteps >= 30000) {
+            achievementText = '👏 EXCELLENT EFFORT!';
+            achievementClass = 'excellent';
+        } else if (totalSteps >= 10000) {
+            achievementText = '🚀 GREAT START!';
+            achievementClass = 'great';
+        }
+        
+        container.innerHTML = `
+            <div class="weekly-champion-display">
+                <div class="champion-avatar">👑</div>
+                <div class="champion-info">
+                    <div class="champion-name">${champion.name}</div>
+                    <div class="champion-team">${champion.team}</div>
+                    <div class="champion-steps">${totalSteps.toLocaleString()}</div>
+                    <div class="champion-label">TOTAL STEPS THIS WEEK</div>
+                    ${achievementText ? `<div class="champion-achievement ${achievementClass}">${achievementText}</div>` : ''}
+                </div>
+            </div>
+        `;
+        
+        console.log('✅ Weekly champion display updated');
     }
 
     updateIndividualLeaderboard(individuals) {
