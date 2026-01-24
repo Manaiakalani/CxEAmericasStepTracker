@@ -12,6 +12,14 @@ A modern, enterprise-grade step tracking web application designed specifically f
 - **Live Notifications**: Real-time achievement alerts with animations
 - **Team Statistics**: Comprehensive analytics and rankings
 
+### 🌟 **New in v2.4**
+- **🧪 E2E Testing**: Playwright test harness with cross-browser support (Chromium, Firefox, WebKit, Mobile)
+- **🔧 User Persistence Fix**: No more re-registration on page reload - optimistic hydration from cache
+- **♿ Accessibility Overhaul**: Full ARIA support, focus trap, keyboard navigation, screen reader friendly
+- **📐 Dynamic Menu Sizing**: Hamburger menu scales responsively using CSS `clamp()` for all devices
+- **🎨 UI Polish**: Unified gradients, premium welcome screen, cleaner flyout without scroll
+- **📚 Documentation**: TESTING.md and BRAND_UI_GUIDE.md for developers
+
 ### 🌟 **New in v2.3**
 - **🗄️ Supabase Database Integration**: Cloud-based data storage with real-time synchronization
 - **🛡️ Admin Dashboard**: Comprehensive admin interface for user and data management
@@ -183,7 +191,33 @@ Enhanced Stack:
 
 ## 🌟 Changelog & Version History
 
-### Version 2.3 (Latest) - "Database & Admin Edition"
+> 📋 **Full changelog**: See [CHANGELOG.md](CHANGELOG.md) for complete version history.
+
+### Latest: Version 2.4 — "Testing & Polish Edition"
+**🗓️ Released: January 23, 2026**
+
+#### Highlights
+- ✅ **E2E Testing**: Playwright test harness with cross-browser support
+- ✅ **User Persistence Fix**: No more re-registration on page reload
+- ✅ **Accessibility**: Full ARIA support, focus trap, keyboard navigation
+- ✅ **Dynamic Menu**: Responsive hamburger menu sizing for all devices
+- ✅ **UI Polish**: Unified gradients, premium welcome screen, cleaner flyout
+- ✅ **Documentation**: TESTING.md, BRAND_UI_GUIDE.md added
+
+### Previous Versions
+
+| Version | Date | Highlights |
+|---------|------|------------|
+| **2.3.0** | 2025-09-24 | Supabase database, Admin Dashboard, Live Display |
+| **2.2.0** | 2025-09-11 | Premium hamburger menu, micro-interactions |
+| **2.1.0** | 2025-09-03 | CxE LT team, interactive footer |
+| **2.0.0** | 2025-08-28 | Weather API, Dark mode, PWA, Spotify |
+| **1.5.0** | 2025-08-27 | Challenges, activity widget |
+| **1.0.0** | 2025-08-26 | Initial release |
+
+---
+
+### Version 2.3 - "Database & Admin Edition"
 **🗓️ Released: September 24, 2025**
 
 #### 🗄️ Enterprise Database Integration
