@@ -1,0 +1,15 @@
+{
+  "name": "cxe-americas-step-tracker",
+  "version": "2.4.1",
+  "private": true,
+  "scripts": {
+    "dev": "http-server . -p 4173 -c-1",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "http-server": "^14.1.1"
+  }
+}

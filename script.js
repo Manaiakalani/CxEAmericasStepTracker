@@ -22,6 +22,16 @@ class StepTracker {
                     this.useSupabase = true;
                     localStorage.setItem('stepTrackerUsesSupabase', 'true');
                     this.isSupabaseForced = true;
+
+                    // Optimistic hydration from local cache for fast UI
+                    try {
+                        const cachedUsers = JSON.parse(localStorage.getItem('stepTrackerUsers') || '[]');
+                        if (cachedUsers.length) {
+                            this.users = cachedUsers;
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse cached users:', e);
+                    }
                     
                     // Test Supabase connection
                     SupabaseHelper.testConnection().then(() => {
@@ -615,16 +625,6 @@ class StepTracker {
             this.closeHamburgerMenu();
         });
 
-        // Keyboard support for menu
-        document.addEventListener('keydown', (e) => {
-            const flyout = document.getElementById('hamburgerFlyout');
-            if (flyout.classList.contains('open')) {
-                if (e.key === 'Escape') {
-                    this.closeHamburgerMenu();
-                }
-            }
-        });
-
         document.getElementById('toggleDarkModeMenu').addEventListener('click', () => {
             this.toggleDarkMode();
         });
@@ -752,8 +752,26 @@ class StepTracker {
 
     loadCurrentUser() {
         const userId = localStorage.getItem('currentStepTrackerUser');
-        if (userId) {
-            this.currentUser = this.users.find(user => user.id === userId);
+        if (!userId) return;
+
+        // Prefer in-memory users
+        let user = this.users.find(u => u.id === userId);
+
+        // Fallback to cached localStorage users if not found yet (Supabase still loading)
+        if (!user) {
+            try {
+                const cachedUsers = JSON.parse(localStorage.getItem('stepTrackerUsers') || '[]');
+                user = cachedUsers.find(u => u.id === userId);
+                if (user && !this.useSupabase) {
+                    this.users = cachedUsers; // hydrate when offline/local mode
+                }
+            } catch (e) {
+                console.warn('Failed to parse cached users in loadCurrentUser:', e);
+            }
+        }
+
+        if (user) {
+            this.currentUser = user;
         }
     }
 
@@ -1464,10 +1482,13 @@ class StepTracker {
 
     updateUI() {
         if (this.currentUser) {
+            this.hideWelcomeScreen();
             this.updateDashboard();
             this.updateLeaderboard();
             this.updateTeamStats();
             this.updateProfile();
+        } else {
+            this.showWelcomeScreen();
         }
     }
 
@@ -2377,28 +2398,75 @@ class StepTracker {
     // Hamburger Menu Functions
     toggleHamburgerMenu() {
         const flyout = document.getElementById('hamburgerFlyout');
+        const hamburgerBtn = document.getElementById('hamburgerMenu');
         const isOpen = flyout.classList.contains('open');
-        
+
         if (isOpen) {
             this.closeHamburgerMenu();
-        } else {
-            flyout.classList.add('open');
-            document.body.style.overflow = 'hidden';
-            
-            // Focus management for accessibility
-            flyout.focus();
-            
-            // Add mobile touch prevention for better UX
-            this.addMobileTouchPrevention();
+            return;
         }
+
+        flyout.classList.add('open');
+        flyout.setAttribute('aria-hidden', 'false');
+        hamburgerBtn?.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+
+        // store previous focus to restore later
+        this._prevFocus = document.activeElement;
+
+        // Focus first focusable element inside flyout
+        const focusable = flyout.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length > 0) {
+            focusable[0].focus();
+        } else {
+            flyout.focus();
+        }
+
+        // trap focus within flyout
+        this._focusTrapHandler = (e) => {
+            if (e.key !== 'Tab') return;
+            const items = flyout.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            if (!items.length) return;
+            const first = items[0];
+            const last = items[items.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        };
+        document.addEventListener('keydown', this._focusTrapHandler);
+
+        // Add mobile touch prevention for better UX
+        this.addMobileTouchPrevention();
     }
 
     closeHamburgerMenu() {
         const flyout = document.getElementById('hamburgerFlyout');
-        
+        const hamburgerBtn = document.getElementById('hamburgerMenu');
+
         flyout.classList.remove('open');
+        flyout.setAttribute('aria-hidden', 'true');
+        hamburgerBtn?.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = 'auto';
-        
+
+        if (this._focusTrapHandler) {
+            document.removeEventListener('keydown', this._focusTrapHandler);
+            this._focusTrapHandler = null;
+        }
+
+        // restore previous focus
+        if (this._prevFocus && typeof this._prevFocus.focus === 'function') {
+            this._prevFocus.focus();
+        }
+        this._prevFocus = null;
+
         // Remove mobile touch prevention
         this.removeMobileTouchPrevention();
     }
@@ -2418,13 +2486,6 @@ class StepTracker {
         this._touchMoveHandler = handleTouchMove;
     }
     
-    removeMobileTouchPrevention() {
-        if (this._touchMoveHandler) {
-            document.removeEventListener('touchmove', this._touchMoveHandler);
-            this._touchMoveHandler = null;
-        }
-    }
-
     removeMobileTouchPrevention() {
         if (this._touchMoveHandler) {
             document.removeEventListener('touchmove', this._touchMoveHandler);

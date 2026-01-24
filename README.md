@@ -157,6 +157,11 @@ Enhanced Stack:
 - **PWA Support**: All major browsers with service worker support
 - **Mobile**: iOS 13+, Android 8+ with full PWA capabilities
 
+## 🧪 Testing
+- **Manual checklist**: See `TESTING.md` for steps (open/close, overlay click, Esc, aria, focus trap, mobile touch).
+- **Automated E2E**: `npm install && npx playwright install && npm run test:e2e` (Chromium, Firefox, WebKit + mobile profiles).
+- **Local server**: Playwright auto-starts `http://localhost:4173` via `http-server`.
+
 ## 🎨 Microsoft-Inspired Design
 
 ### Design System
