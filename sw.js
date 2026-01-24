@@ -1,5 +1,5 @@
 // Enhanced Service Worker for CxE Americas Step Tracker
-const CACHE_VERSION = '2024-09-24-001'; // Update this timestamp when deploying
+const CACHE_VERSION = '2026-01-23-002'; // Update this timestamp when deploying
 const CACHE_NAME = `step-tracker-v${CACHE_VERSION}`;
 const STATIC_CACHE = `step-tracker-static-v${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `step-tracker-dynamic-v${CACHE_VERSION}`;
