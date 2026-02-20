@@ -248,10 +248,18 @@ self.addEventListener('activate', (event) => {
     console.log('Service Worker activating...');
     
     event.waitUntil(
-        Promise.all([
-            // Clean up old caches
-            caches.keys().then(cacheNames => {
-                return Promise.all(
+        caches.keys().then(cacheNames => {
+            // Detect whether this is an update (old caches exist) vs first install
+            const isUpdate = cacheNames.some(name =>
+                name !== STATIC_CACHE &&
+                name !== DYNAMIC_CACHE &&
+                name !== 'step-tracker-meta' &&
+                name.startsWith('step-tracker-')
+            );
+
+            return Promise.all([
+                // Clean up old caches
+                Promise.all(
                     cacheNames.map(cacheName => {
                         // Keep only current version caches and meta cache
                         if (cacheName !== STATIC_CACHE && 
@@ -261,15 +269,15 @@ self.addEventListener('activate', (event) => {
                             return caches.delete(cacheName);
                         }
                     })
-                );
-            }),
-            
-            // Take control of all clients immediately
-            self.clients.claim(),
-            
-            // Notify clients about the update
-            notifyClientsOfUpdate()
-        ]).then(() => {
+                ),
+                
+                // Take control of all clients immediately
+                self.clients.claim(),
+                
+                // Only notify clients when this is an actual update, not first install
+                isUpdate ? notifyClientsOfUpdate() : Promise.resolve()
+            ]);
+        }).then(() => {
             console.log('Service Worker activated and ready');
         })
     );

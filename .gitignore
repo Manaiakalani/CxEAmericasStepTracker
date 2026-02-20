@@ -52,3 +52,7 @@ node_modules/
 .idea/
 *.swp
 *.swo
+
+# Playwright test artifacts
+test-results/
+playwright-report/
