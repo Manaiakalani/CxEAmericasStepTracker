@@ -57,7 +57,7 @@ test.describe('Hamburger menu', () => {
         new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })
       )
     );
-    expect(await focusables.first().evaluate(el => el === document.activeElement)).toBeTruthy();
+    expect(await focusables.first().evaluate(el => el === document.activeElement)).toBe(true);
 
     // Shift+Tab backward from first element
     await focusables.first().focus();
@@ -67,7 +67,7 @@ test.describe('Hamburger menu', () => {
         new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true })
       )
     );
-    expect(await focusables.nth(count - 1).evaluate(el => el === document.activeElement)).toBeTruthy();
+    expect(await focusables.nth(count - 1).evaluate(el => el === document.activeElement)).toBe(true);
   });
 
   test('clicking overlay closes the flyout', async ({ page }) => {
