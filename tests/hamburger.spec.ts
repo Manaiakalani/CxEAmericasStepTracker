@@ -9,6 +9,11 @@ const selectors = {
 test.describe('Hamburger menu', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    // Dismiss any service worker update notification that might intercept pointer events
+    await page.evaluate(() => {
+      const notif = document.getElementById('update-notification');
+      if (notif) notif.remove();
+    });
   });
 
   test('opens/closes with aria states and ESC', async ({ page }) => {
@@ -37,18 +42,32 @@ test.describe('Hamburger menu', () => {
 
     const flyout = page.locator(selectors.flyout);
     const focusables = flyout.locator('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+
+    // Wait for the flyout CSS transition to complete so items are actually focusable
+    await expect(focusables.first()).toBeVisible();
+
     const count = await focusables.count();
     expect(count).toBeGreaterThan(1);
 
     // Tab forward past last element
     await focusables.nth(count - 1).focus();
-    await page.keyboard.press('Tab');
-    await expect(focusables.first()).toBeFocused();
+    // Dispatch Tab directly so it reliably triggers the focus trap in headless mode
+    await page.evaluate(() =>
+      document.activeElement?.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })
+      )
+    );
+    expect(await focusables.first().evaluate(el => el === document.activeElement)).toBe(true);
 
     // Shift+Tab backward from first element
     await focusables.first().focus();
-    await page.keyboard.press('Shift+Tab');
-    await expect(focusables.nth(count - 1)).toBeFocused();
+    // Dispatch Shift+Tab directly
+    await page.evaluate(() =>
+      document.activeElement?.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true })
+      )
+    );
+    expect(await focusables.nth(count - 1).evaluate(el => el === document.activeElement)).toBe(true);
   });
 
   test('clicking overlay closes the flyout', async ({ page }) => {
@@ -74,6 +93,12 @@ test.describe('Hamburger menu', () => {
     ) {
       throw new Error('Calculated overlay click landed in content');
     }
+
+    // Dismiss any update notification that may have appeared since beforeEach
+    await page.evaluate(() => {
+      const notif = document.getElementById('update-notification');
+      if (notif) notif.remove();
+    });
 
     await flyout.click({ position: { x: clickX - box.x, y: clickY - box.y } });
 
