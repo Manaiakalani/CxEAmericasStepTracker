@@ -440,6 +440,54 @@ class StepTracker {
         }
     }
 
+    // Input validation and sanitization
+    validateAndSanitizeInput(input, type) {
+        if (input === null || input === undefined) {
+            throw new Error('Input cannot be empty');
+        }
+        
+        const sanitized = String(input).trim();
+        
+        switch (type) {
+            case 'goal':
+                const goal = parseInt(sanitized, 10);
+                if (isNaN(goal)) {
+                    throw new Error('Please enter a valid number');
+                }
+                if (goal < 100) {
+                    throw new Error('Goal must be at least 100 steps');
+                }
+                if (goal > 100000) {
+                    throw new Error('Goal cannot exceed 100,000 steps');
+                }
+                return goal;
+                
+            case 'team':
+                if (!this.teams.includes(sanitized)) {
+                    throw new Error('Invalid team selection');
+                }
+                return sanitized;
+                
+            case 'steps':
+                const steps = parseInt(sanitized, 10);
+                if (isNaN(steps) || steps < 0) {
+                    throw new Error('Please enter a valid number of steps');
+                }
+                if (steps > 200000) {
+                    throw new Error('Step count seems unrealistic. Please verify.');
+                }
+                return steps;
+                
+            default:
+                // Basic XSS prevention for string inputs
+                return sanitized
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#x27;');
+        }
+    }
+
     // New helper methods for enhanced error handling
     getMemoryUsage() {
         if ('memory' in performance) {
