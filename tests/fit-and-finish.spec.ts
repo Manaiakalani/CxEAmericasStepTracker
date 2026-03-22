@@ -791,23 +791,22 @@ test.describe('Cross-component interactions', () => {
 
   test('no visual glitches: only one overlay active at a time', async ({ page }) => {
     await page.locator('#hamburgerMenu').click();
+    await expect(page.locator('#hamburgerFlyout')).toHaveClass(/open/);
     await page.locator('#showFAQ').click();
 
-    // Only the FAQ modal should be visible overlay
-    const faqVisible = await page.locator('#faqModal').evaluate(el =>
-      getComputedStyle(el).visibility
-    );
-    expect(faqVisible).toBe('visible');
+    // Wait for FAQ modal to fully appear
+    await expect(page.locator('#faqModal')).toHaveClass(/show/);
+    await expect(page.locator('#faqModal')).toHaveCSS('visibility', 'visible');
 
     // Close FAQ
     await page.locator('#closeFAQ').click();
     await expect(page.locator('#faqModal')).not.toHaveClass(/show/);
 
+    // Wait for close transitions to finish
+    await page.waitForTimeout(400);
+
     // Neither overlay should be visible now
-    const flyoutVisible = await page.locator('#hamburgerFlyout').evaluate(el =>
-      getComputedStyle(el).visibility
-    );
-    expect(flyoutVisible).toBe('hidden');
+    await expect(page.locator('#hamburgerFlyout')).toHaveCSS('visibility', 'hidden');
   });
 
   test('hamburger button restores aria-expanded after flyout-to-modal flow', async ({ page }) => {
