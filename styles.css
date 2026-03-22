@@ -333,7 +333,7 @@ body {
     
     .flyout-content {
         /* Dynamic mobile sizing - expands more on smaller screens */
-        width: clamp(280px, 90vw, 380px);
+        width: clamp(240px, 90vw, 380px);
         margin: auto;
         
         /* Adjust for mobile viewport */
@@ -878,12 +878,23 @@ body {
     .hamburger-backdrop,
     .nav-btn,
     .step-btn,
-    .flyout-item {
-        transition: none;
+    .flyout-item,
+    .close-flyout,
+    .close-modal,
+    .modal-overlay,
+    .modal-content,
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .leaderboard-tab-btn,
+    .leaderboard-item {
+        transition: none !important;
     }
     
     .hamburger-flyout.open .flyout-item {
-        animation: none;
+        animation: none !important;
+        transition-delay: 0s !important;
     }
 }
 
@@ -3565,6 +3576,24 @@ body.menu-open {
     
     .progress-text {
         font-size: 0.95rem;
+    }
+
+    /* Leaderboard tabs - wrap on small screens */
+    .leaderboard-tabs {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        justify-content: center;
+    }
+
+    .leaderboard-tab-btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.85rem;
+        flex: 0 1 auto;
+    }
+
+    .leaderboard-tab-btn.live-display-btn {
+        flex: 1 1 100%;
+        text-align: center;
     }
 }
 
