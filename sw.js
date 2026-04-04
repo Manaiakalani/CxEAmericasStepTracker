@@ -10,6 +10,14 @@ const CRITICAL_RESOURCES = [
     '/index.html',
     '/styles.css',
     '/script.js',
+    '/gamification.js',
+    '/gamification.css',
+    '/web-share.js',
+    '/data-viz.js',
+    '/data-viz.css',
+    '/a11y.js',
+    '/a11y.css',
+    '/perf-security.js',
     '/favicon.svg',
     '/manifest.json'
 ];

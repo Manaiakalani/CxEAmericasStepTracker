@@ -334,6 +334,7 @@ test.describe('Landscape mobile (844×390)', () => {
   test('leaderboard tabs fit in landscape', async ({ page }) => {
     await page.locator('.nav-btn[data-tab="leaderboard"]').click();
     const tabs = page.locator('.leaderboard-tabs');
+    await expect(tabs).toBeVisible();
     const box = await tabs.boundingBox();
     expect(box).toBeTruthy();
     expect(box!.width).toBeLessThanOrEqual(844);
