@@ -38,8 +38,9 @@ async function seedUser(page: Page, opts?: { steps?: Record<string, number>; tea
 // ─────────────────────────────────────────────────────────────
 test.describe('Welcome screen', () => {
   test('shows welcome screen when no user is logged in', async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const welcome = page.locator('#welcomeScreen');
     const isVisible = await welcome.evaluate(el => getComputedStyle(el).display !== 'none');
@@ -47,8 +48,9 @@ test.describe('Welcome screen', () => {
   });
 
   test('welcome content card has rounded corners and shadow', async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const content = page.locator('.welcome-content');
     const styles = await content.evaluate(el => {
@@ -65,9 +67,10 @@ test.describe('Welcome screen', () => {
   });
 
   test('welcome screen is hidden when user is logged in', async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const isHidden = await page.locator('#welcomeScreen').evaluate(
       el => getComputedStyle(el).display === 'none'
@@ -81,9 +84,10 @@ test.describe('Welcome screen', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Dashboard tab – fit & finish', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
   });
 
@@ -204,9 +208,10 @@ test.describe('Dashboard tab – fit & finish', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Leaderboard tab – fit & finish', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
     await page.locator('.nav-btn[data-tab="leaderboard"]').click();
     await expect(page.locator('#leaderboardTab')).toBeVisible();
@@ -316,9 +321,10 @@ test.describe('Leaderboard tab – fit & finish', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Teams tab – fit & finish', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
     await page.locator('.nav-btn[data-tab="teams"]').click();
     await expect(page.locator('#teamsTab')).toBeVisible();
@@ -345,9 +351,10 @@ test.describe('Teams tab – fit & finish', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Profile tab – fit & finish', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
     await page.locator('.nav-btn[data-tab="profile"]').click();
     await expect(page.locator('#profileTab')).toBeVisible();
@@ -424,6 +431,7 @@ test.describe('Profile tab – fit & finish', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Live display page – fit & finish', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await page.goto('/live-display/');
     await page.waitForLoadState('domcontentloaded');
     // Dismiss loading overlay if present
@@ -567,6 +575,7 @@ test.describe('Live display – mobile viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await page.goto('/live-display/');
     await page.waitForLoadState('domcontentloaded');
     await page.evaluate(() => {
@@ -601,9 +610,10 @@ test.describe('Live display – mobile viewport', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Footer & global elements', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
   });
 
@@ -639,9 +649,10 @@ test.describe('Footer & global elements', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Dashboard cards – dark mode', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
     // Enable dark mode
     await page.locator('#hamburgerMenu').click();
@@ -679,9 +690,10 @@ test.describe('Dashboard cards – dark mode', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Add Previous Day modal – from profile', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
     await page.locator('.nav-btn[data-tab="profile"]').click();
     await expect(page.locator('#profileTab')).toBeVisible();
@@ -716,9 +728,10 @@ test.describe('Add Previous Day modal – from profile', () => {
 // ─────────────────────────────────────────────────────────────
 test.describe('Cross-page navigation flow', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
   });
 
@@ -766,9 +779,10 @@ test.describe('Mobile – main app comprehensive', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
   });
 
@@ -917,9 +931,10 @@ test.describe('Mobile – small phone (iPhone SE)', () => {
   test.use({ viewport: { width: 320, height: 568 } });
 
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
   });
 
@@ -977,9 +992,10 @@ test.describe('Mobile – tablet (iPad)', () => {
   test.use({ viewport: { width: 768, height: 1024 } });
 
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await seedUser(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await dismissNotifications(page);
   });
 
@@ -1021,6 +1037,7 @@ test.describe('Mobile – live display page', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await page.goto('/live-display/');
     await page.waitForLoadState('domcontentloaded');
     await page.evaluate(() => {
