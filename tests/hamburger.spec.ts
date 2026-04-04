@@ -8,6 +8,7 @@ const selectors = {
 
 test.describe('Hamburger menu', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/@supabase/**', route => route.abort());
     await page.goto('/');
     // Dismiss any service worker update notification that might intercept pointer events
     await page.evaluate(() => {

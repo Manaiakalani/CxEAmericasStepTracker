@@ -2693,14 +2693,16 @@ body.menu-open {
 @media (max-height: 600px) {
     .modal-overlay {
         align-items: flex-start;
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+        padding: 0.25rem;
+        overflow-y: auto;
     }
     
     .modal-content {
-        max-height: 95vh;
-        margin-top: auto;
+        max-height: calc(100dvh - 0.5rem);
+        margin-top: 0;
         margin-bottom: auto;
+        overflow-y: auto;
+        flex-shrink: 0;
     }
 }
 
