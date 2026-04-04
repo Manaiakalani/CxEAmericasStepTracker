@@ -868,6 +868,7 @@ test.describe('Mobile – main app comprehensive', () => {
   test('leaderboard period tabs wrap or scroll on mobile', async ({ page }) => {
     await page.locator('.nav-btn[data-tab="leaderboard"]').click();
     const tabs = page.locator('.leaderboard-tabs');
+    await expect(tabs).toBeVisible();
     const box = await tabs.boundingBox();
     expect(box).toBeTruthy();
     // Should not exceed viewport
@@ -876,7 +877,9 @@ test.describe('Mobile – main app comprehensive', () => {
 
   test('profile tab card fits within mobile viewport', async ({ page }) => {
     await page.locator('.nav-btn[data-tab="profile"]').click();
+    await expect(page.locator('#profileTab')).toBeVisible();
     const card = page.locator('.profile-card');
+    await expect(card).toBeVisible();
     const box = await card.boundingBox();
     expect(box).toBeTruthy();
     expect(box!.width).toBeLessThanOrEqual(390);
@@ -884,6 +887,7 @@ test.describe('Mobile – main app comprehensive', () => {
 
   test('profile action buttons are tappable on mobile', async ({ page }) => {
     await page.locator('.nav-btn[data-tab="profile"]').click();
+    await expect(page.locator('#profileTab')).toBeVisible();
     const buttons = page.locator('.profile-actions .btn');
     const count = await buttons.count();
 
@@ -1016,6 +1020,7 @@ test.describe('Mobile – tablet (iPad)', () => {
   test('leaderboard period tabs have room to display inline', async ({ page }) => {
     await page.locator('.nav-btn[data-tab="leaderboard"]').click();
     const tabs = page.locator('.leaderboard-tabs');
+    await expect(tabs).toBeVisible();
     const box = await tabs.boundingBox();
     expect(box).toBeTruthy();
     expect(box!.width).toBeLessThanOrEqual(768);
@@ -1023,6 +1028,7 @@ test.describe('Mobile – tablet (iPad)', () => {
 
   test('profile stats use 3-column grid on tablet', async ({ page }) => {
     await page.locator('.nav-btn[data-tab="profile"]').click();
+    await expect(page.locator('#profileTab')).toBeVisible();
     const stats = page.locator('.profile-stats');
     const cols = await stats.evaluate(el => getComputedStyle(el).gridTemplateColumns);
     const colCount = cols.split(/\s+/).length;
