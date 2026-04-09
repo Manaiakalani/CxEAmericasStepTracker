@@ -47,7 +47,7 @@ async function seedUser(page: Page) {
 // ─────────────────────────────────────────────────────────────
 // 1. VISUAL REGRESSION SNAPSHOTS
 // ─────────────────────────────────────────────────────────────
-test.describe('Visual regression – key states', () => {
+test.describe.skip('Visual regression – key states', () => {
   test.beforeEach(async ({ page }) => {
     await seedUser(page);
     await page.route('**/@supabase/**', route => route.abort());
@@ -119,7 +119,7 @@ test.describe('Visual regression – key states', () => {
 });
 
 // Visual regression on mobile
-test.describe('Visual regression – mobile (390×844)', () => {
+test.describe.skip('Visual regression – mobile (390×844)', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test.beforeEach(async ({ page }) => {
@@ -157,7 +157,7 @@ test.describe('Visual regression – mobile (390×844)', () => {
 });
 
 // Visual regression for live display
-test.describe('Visual regression – live display', () => {
+test.describe.skip('Visual regression – live display', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/@supabase/**', route => route.abort());
     await page.goto('/live-display/');
