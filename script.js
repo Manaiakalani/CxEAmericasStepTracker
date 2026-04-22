@@ -1496,10 +1496,21 @@ class StepTracker {
         // Show back button only if there are existing users
         if (this.users && this.users.length > 0) {
             backToSelectionBtn.style.display = 'block';
-            registrationTitle.textContent = '🆕 New User Registration';
+            this._setRegistrationTitle(registrationTitle, 'New User Registration');
         } else {
             backToSelectionBtn.style.display = 'none';
-            registrationTitle.textContent = '🚀 Get Started!';
+            this._setRegistrationTitle(registrationTitle, 'Get Started!');
+        }
+    }
+
+    _setRegistrationTitle(h3, text) {
+        if (!h3) return;
+        const span = h3.querySelector('.section-title-text');
+        if (span) {
+            span.textContent = text;
+        } else {
+            // Fallback if structure changed
+            h3.textContent = text;
         }
     }
     
@@ -2827,6 +2838,71 @@ class StepTracker {
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.stepTracker = new StepTracker();
+
+    // --- Header backdrop-filter gating on scroll (Item 9) ---
+    // Avoid paint cost at the top of the page: only blur when user has scrolled.
+    (function initHeaderScrollState() {
+        const header = document.querySelector('.header');
+        if (!header) return;
+        let ticking = false;
+        const update = () => {
+            ticking = false;
+            const scrolled = window.scrollY > 8;
+            if (scrolled !== header.classList.contains('is-scrolled')) {
+                header.classList.toggle('is-scrolled', scrolled);
+            }
+        };
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                ticking = true;
+                requestAnimationFrame(update);
+            }
+        }, { passive: true });
+        update();
+    })();
+
+    // --- Mobile header widget collapse (Item 13) ---
+    // On narrow viewports, relocate weather + spotify widgets into the hamburger
+    // flyout so the header doesn't wrap across two rows.
+    (function initMobileHeaderCollapse() {
+        const headerStats = document.querySelector('.header .header-stats');
+        const flyoutSlot = document.getElementById('flyoutMobileWidgets');
+        const spotify = document.getElementById('spotifyWidget');
+        const weather = document.getElementById('weatherInfo');
+        if (!headerStats || !flyoutSlot || (!spotify && !weather)) return;
+
+        const mql = window.matchMedia('(max-width: 480px)');
+        const apply = () => {
+            const widgets = [spotify, weather].filter(Boolean);
+            if (mql.matches) {
+                // Move into flyout slot (appended so hamburger stays leftmost via CSS order)
+                flyoutSlot.setAttribute('aria-hidden', 'false');
+                widgets.forEach(w => {
+                    if (w.parentElement !== flyoutSlot) flyoutSlot.appendChild(w);
+                });
+            } else {
+                flyoutSlot.setAttribute('aria-hidden', 'true');
+                // Restore back to header-stats, keeping relative order: spotify, weather
+                // Hamburger is last in header-stats, so insert before it.
+                const hamburger = document.getElementById('hamburgerMenu');
+                widgets.forEach(w => {
+                    if (w.parentElement !== headerStats) {
+                        if (hamburger && hamburger.parentElement === headerStats) {
+                            headerStats.insertBefore(w, hamburger);
+                        } else {
+                            headerStats.appendChild(w);
+                        }
+                    }
+                });
+            }
+        };
+        apply();
+        if (mql.addEventListener) {
+            mql.addEventListener('change', apply);
+        } else if (mql.addListener) {
+            mql.addListener(apply);
+        }
+    })();
 
     // Register service worker for offline support
     if ('serviceWorker' in navigator) {

@@ -30,6 +30,21 @@
     --success-color: #00d26a;
     --warning-color: #ffb100;
     --error-color: #ff4757;
+    --neutral-pill: #4a5065;
+
+    /* Emil Kowalski easing + duration tokens */
+    --ease-out:       cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-out-soft:  cubic-bezier(0.33, 1, 0.68, 1);
+    --ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-1: 120ms;
+    --dur-2: 180ms;
+    --dur-3: 240ms;
+    --dur-4: 360ms;
+    --dur-5: 500ms;
+
+    --focus-ring: #60a5fa;
 }
 
 body {
@@ -144,7 +159,7 @@ body {
     font-size: 1rem;
     color: white;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.1);
     position: relative;
     overflow: hidden;
@@ -260,7 +275,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     position: relative;
     overflow: hidden;
     min-height: 100px;
@@ -348,7 +363,7 @@ body {
                 0 4px 16px rgba(92, 45, 145, 0.2);
     transform: translateZ(0);
     will-change: transform;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     min-height: 80px;
 }
 
@@ -394,7 +409,7 @@ body {
     text-shadow: 0 2px 12px rgba(0,0,0,0.4);
     letter-spacing: -1px;
     line-height: 1;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .stomp-card.updating .stomp-number {
@@ -584,7 +599,7 @@ body {
 .refresh-indicator i {
     font-size: 1.2rem;
     color: var(--text-secondary);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     will-change: transform;
     transform: translateZ(0);
 }
@@ -612,7 +627,7 @@ body {
     padding: 1rem;
     border-radius: 12px;
     margin-bottom: 0.5rem;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     position: relative;
 }
 
@@ -815,7 +830,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     color: rgba(255, 107, 53, 0.6);
     font-size: 0.85rem;
 }
@@ -851,7 +866,7 @@ body {
     z-index: 9999;
     opacity: 1;
     visibility: visible;
-    transition: all 0.5s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .loading-overlay.hidden {
@@ -900,7 +915,7 @@ body {
     z-index: 10000;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .error-modal.show {
@@ -945,7 +960,7 @@ body {
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -1268,4 +1283,131 @@ body {
     .activity-feed {
         min-height: 250px;
     }
+}
+
+
+/* =========================================================================
+   Kiosk fit-and-finish polish
+   Disable always-on infinite animations (heartbeat, crown-pulse, walkingPulse,
+   spin60fps, pulse, pulse-success, pulse-warning) by default. This TV runs
+   all day - power, attention, and visual hierarchy all benefit.
+   A single subtle breathing animation on the logo remains, gated behind
+   prefers-reduced-motion: no-preference.
+   ========================================================================= */
+
+.logo-section i,
+.pulse-dot,
+.refresh-indicator i.refreshing,
+.champion-avatar,
+.footer-logo i,
+.live-indicator.connected .pulse-dot,
+.live-indicator.no-data .pulse-dot {
+    animation: none;
+}
+
+/* One subtle breathing motion on the logo, opt-in only. Spinner on the
+   refresh button still runs during refresh via inline state. */
+@media (prefers-reduced-motion: no-preference) {
+    .logo-section i {
+        animation: walkingPulse 4s var(--ease-in-out) infinite;
+    }
+    .refresh-indicator i.refreshing {
+        animation: spin60fps 800ms linear infinite;
+    }
+}
+
+/* Global reduced-motion fallback - preserve crossfades, remove movement. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: var(--dur-1) !important;
+        transition-property: opacity, color, background-color, border-color !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Typography - balance display headings; tabular nums for all stat values
+   so big-screen leaderboard digits do not jiggle as they update. */
+h1, h2, h3,
+.title-group h1,
+.title-group h2,
+.stat-header h3,
+.card-header h3,
+.leaderboard-header h2 {
+    text-wrap: balance;
+}
+h1, h2 {
+    letter-spacing: -0.02em;
+}
+.stat-value,
+.stat-number,
+.big-number,
+.leaderboard-rank,
+.rank-number,
+.leaderboard-steps,
+.steps-value,
+.total-steps,
+#totalOffsiteSteps,
+.clock,
+.champion-steps,
+.stomp-value {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    font-optical-sizing: auto;
+}
+
+/* Press feedback for interactive controls on the kiosk. */
+#manualRefreshBtn,
+.manual-refresh-btn,
+.refresh-indicator,
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+#manualRefreshBtn:active,
+.manual-refresh-btn:active,
+button:active {
+    transform: scale(0.97);
+    transition-duration: var(--dur-1);
+}
+
+/* Focus rings - accessible on the dark kiosk surface. */
+:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}
+*:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.28);
+}
+
+/* Neutral "WAITING" pill - red reads as an error; this is just quiet. */
+.waiting-indicator,
+.status-pill.waiting,
+.live-indicator.waiting,
+.live-indicator.waiting .pulse-dot {
+    background-color: var(--neutral-pill) !important;
+    color: var(--text-primary);
+}
+
+/* -------- Clock hide-until-ready (Item 14) --------
+   The #lastUpdate span is rendered empty until the first real data tick.
+   Hiding the whole update-indicator avoids a stray clock icon floating next
+   to nothing on kiosk boot. */
+#lastUpdate[data-clock-ready="false"] {
+    visibility: hidden;
+}
+.update-indicator:has(#lastUpdate[data-clock-ready="false"]) {
+    visibility: hidden;
+}
+
+/* -------- Debug-only UI (Item 14) --------
+   html[data-debug="1"] is set by display.js when ?debug=1 is in the URL.
+   Anything scoped to [data-debug-only] is hidden by default. */
+[data-debug-only] {
+    display: none !important;
+}
+html[data-debug="1"] [data-debug-only] {
+    display: revert !important;
 }

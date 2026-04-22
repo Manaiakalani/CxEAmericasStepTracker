@@ -252,7 +252,7 @@
     border-radius: 0.75rem;
     background: var(--bg-card, white);
     border: 1px solid var(--border-color, #e1dfdd);
-    transition: all var(--transition-normal);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     animation: dv-slide-up 0.4s ease-out;
 }
 
