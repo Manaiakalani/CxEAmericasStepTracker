@@ -5,12 +5,8 @@
     box-sizing: border-box;
 }
 
-/* Optimize font loading and rendering */
-@font-face {
-    font-family: 'Inter';
-    font-display: swap; /* Improve font loading performance */
-    src: url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-}
+/* Inter is loaded via <link> in index.html; the prior @font-face pointed
+   at a stylesheet URL (not a font file) and was dead weight. Removed. */
 
 /* CSS Custom Properties with performance optimizations */
 :root {
@@ -43,7 +39,7 @@
     --gradient-success: linear-gradient(135deg, var(--ms-green), var(--ms-teal));
     
     /* Light theme variables */
-    --bg-primary: var(--gradient-primary);
+    --bg-primary: var(--ms-gray-50);
     --bg-secondary: rgba(255, 255, 255, 0.95);
     --bg-card: white;
     --bg-card-rgb: 255, 255, 255;
@@ -62,28 +58,70 @@
     --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     
     /* Animation variables for consistency */
-    --transition-fast: 0.15s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
+    /* Emil Kowalski easing + duration tokens */
+    --ease-out:       cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-out-soft:  cubic-bezier(0.33, 1, 0.68, 1);
+    --ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-1: 120ms;   /* press / hover */
+    --dur-2: 180ms;   /* tooltip, small popover */
+    --dur-3: 240ms;   /* dropdown, tab switch */
+    --dur-4: 360ms;   /* modal, drawer */
+    --dur-5: 500ms;   /* marketing only */
+
+    /* Spacing rhythm */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+
+    /* Focus ring */
+    --focus-ring: var(--ms-blue);
+
+    /* Redefine the existing tokens in terms of the new ones */
+    --transition-fast:   var(--dur-1) var(--ease-out);
+    --transition-normal: var(--dur-3) var(--ease-out);
+    --transition-slow:   var(--dur-4) var(--ease-out-soft);
+
+    /* Calm body surface (replaces 135° blue→purple) */
+    --app-bg: var(--ms-gray-50);
+    --app-bg-accent: radial-gradient(
+        ellipse 80% 60% at 50% -10%,
+        rgba(0, 120, 212, 0.12),
+        transparent 60%
+    );
 }
 
 [data-theme="dark"] {
     /* Dark theme variables - optimized for performance */
-    --bg-primary: linear-gradient(135deg, #1a1a1a, #2d1b69);
+    --bg-primary: #0b0d10;
     --bg-secondary: rgba(31, 41, 55, 0.95);
-    --bg-card: #1f2937;
-    --bg-card-rgb: 31, 41, 55;
-    --bg-nav: rgba(31, 41, 55, 0.9);
-    --bg-input: #374151;
+    --bg-card: #14161a;
+    --bg-card-rgb: 20, 22, 26;
+    --bg-nav: rgba(20, 22, 26, 0.9);
+    --bg-input: #1b1f26;
     --bg-hover: rgba(59, 130, 246, 0.1);
     --text-primary: #f9fafb;
     --text-secondary: #d1d5db;
     --text-tertiary: #9ca3af;
-    --border-color: #4b5563;
+    --border-color: #2b2f37;
     --border-light: rgba(75, 85, 99, 0.2);
     --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
-    
+    --focus-ring: #60a5fa;
+
+    --app-bg: #0b0d10;
+    --app-bg-accent: radial-gradient(
+        ellipse 80% 60% at 50% -10%,
+        rgba(0, 120, 212, 0.18),
+        transparent 60%
+    );
+
     /* Dark theme specific overrides */
     --ms-gray-50: #374151;
     --ms-gray-100: #4b5563;
@@ -93,28 +131,29 @@
 /* Optimized body styles with GPU acceleration hints */
 body {
     font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    background: var(--bg-primary);
+    background-color: var(--app-bg);
+    background-image: var(--app-bg-accent);
     background-attachment: fixed;
-    background-color: var(--ms-blue);
+    background-repeat: no-repeat;
     min-height: 100vh;
     min-height: var(--viewport-height, 100vh);
     min-height: 100dvh; /* Dynamic viewport height for modern browsers */
     color: var(--text-primary);
     line-height: 1.6;
-    
+
     /* Mobile optimizations */
     overflow-x: hidden; /* Prevent horizontal scroll */
-    
+
     /* Performance optimizations */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    
+
     /* Smooth transitions with GPU acceleration */
-    transition: background var(--transition-normal), color var(--transition-normal);
+    transition: background-color var(--transition-normal), color var(--transition-normal);
     transform: translateZ(0); /* Force GPU layer */
     backface-visibility: hidden; /* Prevent flicker */
-    
+
     /* Optimize scrolling */
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
@@ -143,13 +182,22 @@ body {
 /* Header Styles */
 .header {
     background: var(--bg-secondary);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid transparent;
     padding: 1rem 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: background 0.3s ease, border-color 0.3s ease;
+    transition: background-color var(--dur-2) var(--ease-out),
+                backdrop-filter var(--dur-2) var(--ease-out),
+                -webkit-backdrop-filter var(--dur-2) var(--ease-out),
+                border-color var(--dur-2) var(--ease-out);
+}
+
+/* Only paint the expensive blur once the user has scrolled past the top. */
+.header.is-scrolled {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom-color: var(--border-light);
 }
 
 .header-content {
@@ -197,7 +245,7 @@ body {
     justify-content: center;
     gap: 0.5rem;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     color: var(--ms-blue);
     backdrop-filter: blur(12px);
     position: relative;
@@ -249,7 +297,7 @@ body {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 /* Open state */
@@ -397,7 +445,7 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .close-flyout:hover {
@@ -446,7 +494,7 @@ body {
     line-height: 1.4;
     
     /* Animation */
-    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     transform: translateY(15px);
     opacity: 0;
     position: relative;
@@ -494,7 +542,7 @@ body {
     text-align: center;
     flex-shrink: 0;
     color: var(--ms-blue);
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 /* Dividers */
@@ -621,7 +669,7 @@ body {
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 50%;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -840,11 +888,11 @@ body {
     
     /* Reduce animation for better performance on mobile */
     .hamburger-flyout {
-        transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     }
     
     .hamburger-backdrop {
-        transition: all 0.25s ease;
+        transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     }
     
     /* Better spacing for touch */
@@ -872,29 +920,15 @@ body {
     }
 }
 
-/* Reduce motion for users who prefer it */
+/* Reduce motion for users who prefer it — preserve color/opacity crossfades,
+   kill only transforms and infinite animations (per Emil rubric). */
 @media (prefers-reduced-motion: reduce) {
-    .hamburger-flyout,
-    .hamburger-backdrop,
-    .nav-btn,
-    .step-btn,
-    .flyout-item,
-    .close-flyout,
-    .close-modal,
-    .modal-overlay,
-    .modal-content,
-    .btn,
-    .btn-primary,
-    .btn-secondary,
-    .btn-danger,
-    .leaderboard-tab-btn,
-    .leaderboard-item {
-        transition: none !important;
-    }
-    
-    .hamburger-flyout.open .flyout-item {
-        animation: none !important;
-        transition-delay: 0s !important;
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: var(--dur-1) !important;
+        transition-property: opacity, color, background-color, border-color !important;
+        scroll-behavior: auto !important;
     }
 }
 
@@ -1091,7 +1125,7 @@ body {
     cursor: pointer;
     padding: 0.75rem;
     border-radius: 14px;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     width: 48px;
     height: 48px;
     display: flex;
@@ -1118,7 +1152,7 @@ body {
         rgba(220, 38, 38, 0.2) 70%, 
         transparent 100%);
     border-radius: 50%;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     transform: translate(-50%, -50%);
 }
 
@@ -1233,7 +1267,7 @@ body {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     color: var(--text-primary);
     font-size: 0.95rem;
     font-weight: 500;
@@ -1277,7 +1311,7 @@ body {
 .flyout-menu {
     opacity: 0;
     transform: translateY(20px);
-    transition: all 0.3s ease 0.1s;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .hamburger-flyout.open .flyout-menu {
@@ -1510,7 +1544,7 @@ body {
         rgba(6, 182, 212, 0.15) 100%);
     border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 12px;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     position: relative;
     overflow: hidden;
     box-shadow: 
@@ -1589,7 +1623,7 @@ body {
     font-weight: 600;
     letter-spacing: -0.02em;
     font-size: 1.05rem;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     position: relative;
 }
 
@@ -1672,7 +1706,7 @@ body.menu-open {
     cursor: pointer;
     padding: 0.25rem;
     border-radius: 50%;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .close-flyout:hover {
@@ -1695,7 +1729,7 @@ body.menu-open {
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     color: var(--text-primary);
     font-size: 0.875rem;
     text-align: left;
@@ -1752,7 +1786,7 @@ body.menu-open {
     border-radius: 0.75rem;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(29, 185, 84, 0.3);
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     cursor: pointer;
     text-decoration: none;
 }
@@ -1852,7 +1886,7 @@ body.menu-open {
     border: none;
     border-radius: 0.75rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     color: var(--text-secondary);
     font-size: 0.875rem;
 }
@@ -2018,7 +2052,7 @@ body.menu-open {
     border-radius: 0.75rem;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     box-shadow: 0 4px 12px rgba(0, 120, 212, 0.25);
 }
 
@@ -2035,7 +2069,7 @@ body.menu-open {
     border-radius: 0.75rem;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .existing-user-section .btn-secondary:hover {
@@ -2057,7 +2091,7 @@ body.menu-open {
 }
 
 .registration-section {
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .registration-section h3 {
@@ -2141,7 +2175,7 @@ body.menu-open {
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     text-decoration: none;
 }
 
@@ -2221,7 +2255,7 @@ body.menu-open {
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 0.5rem;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2423,7 +2457,7 @@ body.menu-open {
 /* Rainbow heart glow effect */
 .footer-text .heart-emoji {
     display: inline-block;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     cursor: pointer;
 }
 
@@ -2492,7 +2526,7 @@ body.menu-open {
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     padding: 2rem;
     box-sizing: border-box;
     overflow-y: auto;
@@ -2511,8 +2545,9 @@ body.menu-open {
     width: 100%;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
     overflow: hidden;
-    transform: scale(0.9) translateY(-20px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: scale(0.96) translateY(-8px);
+    opacity: 0;
+    transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     border: 1px solid var(--border-color);
     position: relative;
     margin: auto;
@@ -2522,6 +2557,7 @@ body.menu-open {
 
 .modal-overlay.show .modal-content {
     transform: scale(1) translateY(0);
+    opacity: 1;
 }
 
 .modal-header {
@@ -2547,7 +2583,7 @@ body.menu-open {
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 50%;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2888,7 +2924,7 @@ body.menu-open {
     border-radius: 0.5rem 0.5rem 0 0;
     min-height: 20px;
     position: relative;
-    transition: all 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .day-bar:hover {
@@ -3048,7 +3084,7 @@ body.menu-open {
     border-radius: 0.75rem;
     color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     font-weight: 500;
     font-size: 0.95rem;
     position: relative;
@@ -3145,7 +3181,7 @@ body.menu-open {
     padding: 1rem;
     background: var(--bg-input);
     border-radius: 1rem;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .leaderboard-item:hover {
@@ -3262,7 +3298,7 @@ body.menu-open {
     padding: 1.5rem;
     background: var(--bg-input);
     border-radius: 1rem;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
 .team-item:hover {
@@ -3724,7 +3760,7 @@ body.menu-open {
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
     background: var(--bg-card);
     color: var(--text-primary);
     border: 2px solid var(--border-color);
@@ -3826,4 +3862,212 @@ body.menu-open {
 
 .cloud-sync-indicator.syncing i {
     animation: pulse 1.5s infinite;
+}
+
+/* =========================================================================
+   Emil Kowalski fit-and-finish polish
+   Added by DESIGN_REVIEW.md pass. Append-only; keep diffs readable.
+   ========================================================================= */
+
+/* Heading treatment — balance short display lines, pretty-wrap paragraphs,
+   tighten display tracking. Zero-cost typographic polish. */
+h1, h2, h3,
+.welcome-content h1, .welcome-content h2, .welcome-content h3,
+.section-header h2, .flyout-header h2 {
+    text-wrap: balance;
+}
+h1, h2 {
+    letter-spacing: -0.02em;
+}
+p, .welcome-content p, .subtitle, .muted {
+    text-wrap: pretty;
+}
+
+/* Press feedback — every pressable element gets a subtle scale.
+   Respects reduced-motion via the global block above. */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.nav-btn,
+.step-btn,
+.hamburger-menu,
+.close-flyout,
+.close-modal,
+.flyout-item,
+.card-action,
+.leaderboard-tab-btn,
+.manual-refresh-btn,
+#manualRefreshBtn,
+.tab,
+button.icon-btn,
+[role="button"] {
+    -webkit-tap-highlight-color: transparent;
+}
+.btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-danger:active,
+.nav-btn:active,
+.step-btn:active,
+.hamburger-menu:active,
+.close-flyout:active,
+.close-modal:active,
+.flyout-item:active,
+.card-action:active,
+.leaderboard-tab-btn:active,
+.manual-refresh-btn:active,
+#manualRefreshBtn:active,
+.tab:active,
+button.icon-btn:active {
+    transform: scale(0.97);
+    transition-duration: var(--dur-1);
+}
+
+/* Focus rings — accessible, high-contrast, only for keyboard users. */
+:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}
+*:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+.btn:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.nav-btn:focus-visible,
+.hamburger-menu:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(0, 120, 212, 0.18);
+}
+
+/* Transform-origins — popovers/flyouts scale from their trigger edge,
+   not center (Emil rubric). Modals stay centered. */
+.hamburger-flyout {
+    transform-origin: top right;
+}
+.tooltip,
+[role="tooltip"] {
+    transform-origin: bottom center;
+}
+
+/* Tabular numbers for any metric/stat display — stops jiggle on update. */
+.stat-value,
+.stat-number,
+.steps-count,
+.metric-value,
+.leaderboard-rank,
+.leaderboard-steps,
+.step-count,
+.progress-percentage {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+/* Empty-state copy class (for JS to target). */
+.empty-state {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--space-6) var(--space-4);
+}
+.empty-state .empty-state-icon {
+    color: var(--text-tertiary);
+    opacity: 0.6;
+    margin-bottom: var(--space-3);
+    font-size: 2rem;
+}
+
+/* Gate the header backdrop-filter blur to scrolled state via .scrolled class
+   (defensive — JS may not set it; the @supports keeps it free on unsupported browsers). */
+@supports not (backdrop-filter: blur(10px)) {
+    .header {
+        backdrop-filter: none;
+    }
+}
+
+/* Skeleton shimmer helper. Linear curve, 1.4s period (not 60fps costly). */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.04) 0%,
+        rgba(0, 0, 0, 0.08) 50%,
+        rgba(0, 0, 0, 0.04) 100%
+    );
+    background-size: 200% 100%;
+    border-radius: 6px;
+    animation: shimmer 1400ms linear infinite;
+}
+[data-theme="dark"] .skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0.10) 50%,
+        rgba(255, 255, 255, 0.04) 100%
+    );
+    background-size: 200% 100%;
+}
+
+/* -------- Section title with inline SVG icon (Item 2) --------
+   Replaces leading emoji in structural H2/H3 with a paired lucide-style
+   24px stroke icon. Only applied to headings that use the class explicitly,
+   so celebratory/body emoji elsewhere are preserved. */
+.section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    line-height: 1.2;
+}
+.section-icon {
+    width: 1.15em;
+    height: 1.15em;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+    color: var(--ms-blue);
+}
+
+/* -------- Mobile header widget collapse (Item 13) --------
+   Below 480px, JS relocates #spotifyWidget and #weatherInfo into the flyout's
+   #flyoutMobileWidgets slot. Above that, the slot is empty and hidden. */
+.flyout-mobile-widgets {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 0.25rem 0.25rem;
+}
+.flyout-mobile-widgets:not(:empty) {
+    display: flex;
+}
+.flyout-mobile-widgets .spotify-widget,
+.flyout-mobile-widgets .weather-info {
+    width: 100%;
+    max-width: 100%;
+}
+/* Subheader hint above relocated widgets, CSS-only (no extra markup) */
+.flyout-mobile-widgets:not(:empty)::before {
+    content: "Widgets";
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary, var(--text-secondary));
+    padding: 0 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+@media (max-width: 480px) {
+    /* Ensure any stale visibility rules don't leak when widgets are in flyout */
+    .flyout-mobile-widgets {
+        margin: 0 -0.25rem 0.25rem;
+    }
 }

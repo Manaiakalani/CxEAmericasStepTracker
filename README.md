@@ -91,8 +91,15 @@ A modern, enterprise-grade step tracking web application designed specifically f
 3. **Start tracking** - works with cloud sync or offline!
 
 ### Admin Access
-1. **Navigate to `/admin-dashboard.html`**
-2. **Enter admin password** (secure authentication)
+The admin console now lives as a React + shadcn/ui SPA at `/admin/dist/` (the
+legacy `admin-login.html` and `admin-dashboard.html` pages are thin redirect
+stubs that forward to it). Authentication uses the Supabase
+`verify_admin_credentials` RPC — no credentials are embedded in the static
+HTML. See [`admin/README.md`](admin/README.md) for the full stack, routes, and
+build commands.
+
+1. **Navigate to `/admin/dist/#/login`** (or `/admin-login.html`, which redirects)
+2. **Sign in** with admin credentials verified against Supabase
 3. **Manage users, view analytics, add manual steps**
 
 ### Live Display
