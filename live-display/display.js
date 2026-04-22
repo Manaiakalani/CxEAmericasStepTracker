@@ -3,6 +3,32 @@
  * Handles real-time data synchronization with main step tracker app
  */
 
+// --- Debug gate (Item 14) ---
+// Verbose console output and the debug test button are only active when the
+// page is loaded with ?debug=1. This keeps the kiosk clean in production.
+const DEBUG_MODE = (() => {
+    try {
+        return new URLSearchParams(location.search).get('debug') === '1';
+    } catch (_e) {
+        return false;
+    }
+})();
+if (!DEBUG_MODE) {
+    // Silence the bulk of verbose logging without losing errors/warnings.
+    const _noop = () => {};
+    console.log = _noop;
+    console.debug = _noop;
+    console.info = _noop;
+    // Hide the footer debug button if present.
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('debugTestBtn');
+        if (btn) btn.style.display = 'none';
+    }, { once: true });
+} else {
+    // Expose for CSS gating of any debug-only UI.
+    document.documentElement.setAttribute('data-debug', '1');
+}
+
 class LiveDisplay {
     constructor() {
         this.refreshInterval = 30000; // 30 seconds for auto-refresh
@@ -512,18 +538,23 @@ class LiveDisplay {
 
     updateTimeDisplay() {
         // Show the last data refresh time instead of constantly updating current time
-        const timeString = this.lastUpdateTime ? 
-            this.formatTimeWithoutSeconds(this.lastUpdateTime) : 
-            '--:--';
         const element = document.getElementById('lastUpdate');
-        if (element) {
-            requestAnimationFrame(() => {
-                element.textContent = timeString;
-                // Removed blinking color animation for cleaner display
-            });
+        if (!element) return;
+
+        // Hide the clock until we have a real timestamp to render. Avoids the
+        // brief "--:--" flash on kiosk load that makes the display look broken.
+        if (!this.lastUpdateTime) {
+            element.setAttribute('data-clock-ready', 'false');
+            return;
         }
-        
-        // Removed refresh status blinking animation for cleaner display
+
+        const timeString = this.formatTimeWithoutSeconds(this.lastUpdateTime);
+        requestAnimationFrame(() => {
+            element.textContent = timeString;
+            if (element.getAttribute('data-clock-ready') !== 'true') {
+                element.setAttribute('data-clock-ready', 'true');
+            }
+        });
     }
 
     async loadData() {
@@ -1396,6 +1427,17 @@ class LiveDisplay {
         
         console.log('Found individual leaderboard container');
 
+        // --- FLIP reorder prep (Item 7 stretch) ---
+        // Record pre-update positions keyed by stable row id, so rows that
+        // actually move can animate instead of pop after the DOM wipe.
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const firstPositions = new Map();
+        if (!reduceMotion) {
+            container.querySelectorAll('.leaderboard-item[data-row-id]').forEach(el => {
+                firstPositions.set(el.getAttribute('data-row-id'), el.getBoundingClientRect());
+            });
+        }
+
         const fragment = document.createDocumentFragment();
         
         if (individuals.length === 0) {
@@ -1404,8 +1446,8 @@ class LiveDisplay {
             emptyItem.className = 'leaderboard-item empty-state';
             emptyItem.innerHTML = `
                 <div class="empty-message">
-                    <i class="fas fa-users"></i>
-                    <p>No participants yet. Start tracking steps in the main app!</p>
+                    <i class="fas fa-shoe-prints" aria-hidden="true"></i>
+                    <p>Waiting for the first step to be logged.</p>
                 </div>
             `;
             fragment.appendChild(emptyItem);
@@ -1415,6 +1457,8 @@ class LiveDisplay {
                 console.log(`Creating item for person ${index}:`, person);
                 const item = document.createElement('div');
                 item.className = `leaderboard-item ${person.rank <= 3 ? 'top-3' : ''}`;
+                const rowId = `ind:${person.name}|${person.team || ''}`;
+                item.setAttribute('data-row-id', rowId);
                 item.innerHTML = `
                     <div class="leaderboard-rank ${this.getRankClass(person.rank)}">
                         ${person.rank}
@@ -1436,12 +1480,21 @@ class LiveDisplay {
             container.innerHTML = '';
             container.appendChild(fragment);
             console.log('Individual leaderboard DOM updated with', container.children.length, 'items');
+            this._playFlipAnimations(container, firstPositions);
         });
     }
 
     updateTeamLeaderboard(teams) {
         const container = document.getElementById('teamLeaderboard');
         if (!container) return;
+
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const firstPositions = new Map();
+        if (!reduceMotion) {
+            container.querySelectorAll('.leaderboard-item[data-row-id]').forEach(el => {
+                firstPositions.set(el.getAttribute('data-row-id'), el.getBoundingClientRect());
+            });
+        }
 
         const fragment = document.createDocumentFragment();
         
@@ -1450,8 +1503,8 @@ class LiveDisplay {
             emptyItem.className = 'leaderboard-item empty-state';
             emptyItem.innerHTML = `
                 <div class="empty-message">
-                    <i class="fas fa-users-cog"></i>
-                    <p>No team data yet. Register and start tracking!</p>
+                    <i class="fas fa-users" aria-hidden="true"></i>
+                    <p>Team rankings appear once the first team logs steps.</p>
                 </div>
             `;
             fragment.appendChild(emptyItem);
@@ -1459,6 +1512,7 @@ class LiveDisplay {
             teams.forEach((team, index) => {
                 const item = document.createElement('div');
                 item.className = `leaderboard-item ${team.rank <= 3 ? 'top-3' : ''}`;
+                item.setAttribute('data-row-id', `team:${team.name}`);
                 item.innerHTML = `
                     <div class="leaderboard-rank ${this.getRankClass(team.rank)}">
                         ${team.rank}
@@ -1478,6 +1532,34 @@ class LiveDisplay {
         requestAnimationFrame(() => {
             container.innerHTML = '';
             container.appendChild(fragment);
+            this._playFlipAnimations(container, firstPositions);
+        });
+    }
+
+    // FLIP reorder helper — rows that moved vertically slide into their new
+    // position instead of popping there. Gated by prefers-reduced-motion.
+    _playFlipAnimations(container, firstPositions) {
+        if (!firstPositions || firstPositions.size === 0) return;
+        if (typeof Element === 'undefined' || typeof Element.prototype.animate !== 'function') return;
+        const rows = container.querySelectorAll('.leaderboard-item[data-row-id]');
+        rows.forEach(row => {
+            const id = row.getAttribute('data-row-id');
+            const prev = firstPositions.get(id);
+            if (!prev) return;
+            const last = row.getBoundingClientRect();
+            const dy = prev.top - last.top;
+            if (Math.abs(dy) < 1) return;
+            row.animate(
+                [
+                    { transform: `translateY(${dy}px)` },
+                    { transform: 'translateY(0)' }
+                ],
+                {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+                    composite: 'replace'
+                }
+            );
         });
     }
 
@@ -1502,18 +1584,22 @@ class LiveDisplay {
         const fragment = document.createDocumentFragment();
         
         if (activities.length === 0) {
-            console.log('No activities to display - showing empty state with debug info');
+            console.log('No activities to display - showing empty state');
             const emptyItem = document.createElement('div');
             emptyItem.className = 'activity-item empty-state';
-            emptyItem.innerHTML = `
-                <div class="empty-message">
-                    <i class="fas fa-bolt"></i>
-                    <p>No recent activities. Activity will appear here as users log steps!</p>
-                    <small style="color: #666; margin-top: 10px; display: block;">
+            // Debug block is only rendered when ?debug=1 is in the URL so the
+            // kiosk doesn't leak internal state on-screen at the event.
+            const debugHTML = DEBUG_MODE ? `
+                    <small class="empty-debug" style="color: #666; margin-top: 10px; display: block;">
                         Debug: Supabase ${typeof SupabaseHelper !== 'undefined' ? 'available' : 'unavailable'}<br>
                         LocalStorage activities: ${JSON.parse(localStorage.getItem('stepTrackerActivities') || '[]').length}<br>
                         Last checked: ${this.formatTimeWithoutSeconds(new Date())}
-                    </small>
+                    </small>` : '';
+            emptyItem.innerHTML = `
+                <div class="empty-message">
+                    <i class="fas fa-bolt" aria-hidden="true"></i>
+                    <p>Listening for activity — steps will appear here as they happen.</p>
+                    ${debugHTML}
                 </div>
             `;
             fragment.appendChild(emptyItem);
