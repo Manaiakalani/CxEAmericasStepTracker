@@ -2,7 +2,7 @@
 
 **Audit scope:** `index.html`, `admin-login.html`, `admin-dashboard.html`, `live-display/index.html`
 **Viewports:** desktop 1440×900 and mobile 390×844, in light + dark themes
-**Method:** Playwright capture (`tests/design-audit.spec.ts`, 16 runs / 59 PNGs in `design-review-screenshots/`) + line-level CSS/HTML audit against the Emil Kowalski design-engineering rubric in `~/skills.md` and the Anthropic brand guidance.
+**Method:** Playwright capture (`tests/design-audit.spec.ts`, 16 runs / 59 PNGs in `design-review-screenshots/`) + line-level CSS/HTML audit against the design-engineering rubric in `~/skills.md` and the Anthropic brand guidance.
 
 > TL;DR — The app works, but visually it reads as "generic dashboard + purple gradient + emoji H2s." The biggest wins are (1) replacing the Microsoft blue→purple body gradient with a calmer surface, (2) removing emoji from headings, (3) defining real easing tokens and swapping every `transition: all` for explicit property lists, (4) adding `:active { transform: scale(0.97) }` press feedback to every interactive element, and (5) stripping the three always-on infinite animations on the live-display kiosk.
 
@@ -11,7 +11,7 @@
 ## 1. Executive summary
 
 ### `index.html` (participant app)
-- **Identity is generic.** Blue→purple 135° gradient background (`styles.css:42`) + Inter + gradient-filled logo text is the stock "AI slop" aesthetic the Anthropic/Emil rubric warns about. There is no distinctive brand moment.
+- **Identity is generic.** Blue→purple 135° gradient background (`styles.css:42`) + Inter + gradient-filled logo text is the stock "AI slop" aesthetic the design-engineering rubric warns about. There is no distinctive brand moment.
 - **Emoji-prefixed H2/H3** ("🚀 New User Registration", "👋 Welcome back!", "🏆 Leaderboard") break typographic rhythm and reduce authority. Icons should be actual `<svg>` sized to the cap-height, not emoji.
 - **Motion is hand-wavy.** `--transition-fast: 0.15s ease` / `--transition-normal: 0.3s ease` (`styles.css:65-67`) don't define a real curve. `ease` in CSS is `ease-in-out`-ish, which makes every hover feel sluggish. Swap to custom out-curves.
 - **No press feedback.** Not a single primary button on this page has `:active { transform: scale(0.97) }`. Tapping a `.nav-btn` or `.btn` on mobile feels unresponsive.
@@ -33,7 +33,7 @@
 
 ### `live-display/index.html` (kiosk)
 - **Light theme is not defined at all** in `live-display/styles.css`. The light-theme screenshots are identical to dark. For a kiosk this is probably fine, but the toggle implies support that doesn't exist.
-- **Three always-on infinite animations** (`heartbeat`, `crown-pulse`, `walkingPulse`/`spin60fps` at lines 92, 224, 594, 718, 805, 873, 1123, 1217, 1222) run forever on a TV. This violates Emil's "animate rarely" rule and is a real power-draw issue on a kiosk that may run 10 hours/day.
+- **Three always-on infinite animations** (`heartbeat`, `crown-pulse`, `walkingPulse`/`spin60fps` at lines 92, 224, 594, 718, 805, 873, 1123, 1217, 1222) run forever on a TV. This violates the "animate rarely" rule and is a real power-draw issue on a kiosk that may run 10 hours/day.
 - **Empty state reads as broken.** `"WAITING"` red pill top-right + `--:--` clock + empty Live Activity Feed makes it look like the integration failed, not like it's waiting for steps. Replace red with neutral; put a friendly "Listening for activity…" line.
 - **Debug text visible in production capture** (`Debug: Supabase available / LocalStorage activities: 0`) — must be gated behind a `?debug` query param before shipping to a TV.
 - **`THE STOMP` banner is a 100%-wide gradient block with gradient text on a gradient background** — unreadable at the back of a room and the single most "AI slop" moment in the whole product.
@@ -45,7 +45,7 @@
 Add to `styles.css :root` (right after line 67):
 
 ```css
-/* Easing — Emil rubric */
+/* Easing — design rubric */
 --ease-out:       cubic-bezier(0.23, 1, 0.32, 1);     /* default UI */
 --ease-out-soft:  cubic-bezier(0.33, 1, 0.68, 1);     /* long moves */
 --ease-in-out:    cubic-bezier(0.77, 0, 0.175, 1);    /* shared-element */
@@ -78,7 +78,7 @@ Every "Before" row is copy-paste accurate from the file at that line. Every "Aft
 | 1 | `styles.css:9-13` | `@font-face { font-family:'Inter'; src: url('https://fonts.googleapis.com/css2?family=Inter...'); }` | *Delete the block.* Inter is already loaded via `<link>` in `index.html:31`. | `src:` points at a CSS file, not a font file — the rule is dead. |
 | 2 | `styles.css:42` | `--gradient-primary: linear-gradient(135deg, var(--ms-blue), var(--ms-purple));` used as `--bg-primary` on `<body>` | Use a single calm surface (`--bg-primary: var(--ms-gray-50)` in light, `#0b0d10` in dark). Reserve the gradient for the logo mark only. | 135° blue→purple on a full-bleed body is the defining "generic dashboard" look. |
 | 3 | `styles.css:65-67` | `--transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;` | See §2 token block above. | `ease` in CSS is `ease-in-out` which feels sluggish on hover. |
-| 4 | `styles.css:200` (`.hamburger-menu`) | `transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);` | `transition: background-color var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);` plus `&:active { transform: scale(0.97); }` | `all` is a smell (re-layouts everything); Material "standard" curve is weaker than Emil's out-curve; missing press. |
+| 4 | `styles.css:200` (`.hamburger-menu`) | `transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);` | `transition: background-color var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);` plus `&:active { transform: scale(0.97); }` | `all` is a smell (re-layouts everything); Material "standard" curve is weaker than the design rubric's out-curve; missing press. |
 | 5 | `styles.css:1420` | `transition: left 0.6s ease;` (shimmer sweep) | `transition: transform var(--dur-4) var(--ease-out-soft);` + animate `translateX` instead of `left` | 600ms > 300ms UI ceiling; animating `left` triggers layout. |
 | 6 | `styles.css:1534` | `transition: transform 0.6s ease;` | `transition: transform var(--dur-3) var(--ease-out);` | Same 600ms violation. |
 | 7 | `index.html:160,170,185,…` (welcome H3s) | `<h3>🚀 New User Registration</h3>` `<h3>👋 Welcome back!</h3>` | `<h3><svg class="h-icon">…</svg>New user registration</h3>` with `text-wrap: balance` | Emoji in headings are inconsistent across OSes (Apple vs Segoe) and break the line-height rhythm. |
@@ -116,7 +116,7 @@ Every "Before" row is copy-paste accurate from the file at that line. Every "Aft
 | 7 | Dark-mode card surfaces | `--bg-card: #1f2937` + gradient body | Pick one card bg token and stop compositing over the gradient — use a flat `#14161a` base. | Gradient-behind-glass is where the "AI slop" reputation comes from. |
 | 8 | Cards hover | `transition: all 0.3s ease; transform: translateY(-2px) on hover` (common pattern in styles.css) | `transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out); &:hover { transform: translateY(-1px); }` + `@media (hover: hover)` guard | Removes mobile tap-ghost hover + kills `all`. |
 | 9 | Emoji in cells (e.g. "⚡ Quick Actions", "🏆 Top") | Inline emoji | SVG from the same icon set used in section headers. | Unified icon set. |
-| 10 | `prefers-reduced-motion` at `styles.css:876-898` | `transition: none !important` for everything | `transition-property: opacity, color, background-color !important; transition-duration: var(--dur-1) !important;` — keep crossfades, kill movement. | Emil explicitly calls out "don't kill transitions wholesale"; reduced-motion users still benefit from color crossfades. |
+| 10 | `prefers-reduced-motion` at `styles.css:876-898` | `transition: none !important` for everything | `transition-property: opacity, color, background-color !important; transition-duration: var(--dur-1) !important;` — keep crossfades, kill movement. | The design rubric explicitly calls out "don't kill transitions wholesale"; reduced-motion users still benefit from color crossfades. |
 
 ### 3d. `live-display/` (kiosk)
 
@@ -250,7 +250,7 @@ Gaps:
 
 | # | Issue | Location | Fix |
 |---|---|---|---|
-| 1 | Reduced-motion blocks nuke *all* transitions with `transition: none !important` / `transition-duration: 0s !important`. | `styles.css:876-898`, `a11y.css:110-119` | Keep `opacity` and `background-color` transitions (~120ms); kill `transform` and `animation` only. Emil's rubric is explicit about this. |
+| 1 | Reduced-motion blocks nuke *all* transitions with `transition: none !important` / `transition-duration: 0s !important`. | `styles.css:876-898`, `a11y.css:110-119` | Keep `opacity` and `background-color` transitions (~120ms); kill `transform` and `animation` only. The design rubric is explicit about this. |
 | 2 | Two reduced-motion blocks exist with different scope (named selectors vs universal). | same | Consolidate into `a11y.css`; delete the duplicate in `styles.css`. |
 | 3 | Focus ring uses `outline: 2px solid` with `!important` on `*:focus-visible`. | `a11y.css:44-48` | Works, but `!important` on `*` means you can't locally tune it. Remove `!important` from the universal rule; keep it only on the button override. |
 | 4 | On dark surfaces (live-display, hamburger flyout) the focus ring may not meet 3:1 contrast. | `a11y.css:71-74` | Verified partially; test each surface with axe. Consider a two-stop ring: inner white 2px + outer blue 2px for dark bgs. |

@@ -7,7 +7,7 @@ A large-screen live leaderboard display for the CxE Americas Offsite 2025 Step T
 ### Real-time Data Synchronization
 - **Automatic Updates**: Refreshes every 5 seconds for immediate data visibility
 - **Data Source**: Directly syncs with main step tracker localStorage (`stepTrackerUsers`, `stepTrackerActivities`)
-- **Real-time Integration**: No sample/demo data - shows actual participant data
+- **Real-time Integration**: No sample/demo data — shows actual participant data
 - **Error Handling**: Graceful error recovery with empty state displays when no data is available
 
 ### Live Statistics Dashboard
@@ -31,8 +31,8 @@ A large-screen live leaderboard display for the CxE Americas Offsite 2025 Step T
 ## 🔧 Integration Details
 
 ### Data Sources
-- **Users**: `localStorage.stepTrackerUsers` - All registered users from main app
-- **Activities**: `localStorage.stepTrackerActivities` - Recent activities from main app
+- **Users**: `localStorage.stepTrackerUsers` — All registered users from main app
+- **Activities**: `localStorage.stepTrackerActivities` — Recent activities from main app
 - **Today's Focus**: Displays today's step data specifically, not cumulative totals
 
 ### Challenge Calculation
@@ -76,7 +76,7 @@ The live display tracks completion of all 8 main app challenges:
 ## 🎯 Key Improvements Made
 
 ### Integration
-- ✅ **Removed all demo/sample data** - shows only real participant data
+- ✅ **Removed all demo/sample data** — shows only real participant data
 - ✅ **Direct localStorage integration** with main app data structures
 - ✅ **Real-time synchronization** every 5 seconds instead of 30
 - ✅ **Today-focused metrics** showing current day activity specifically
@@ -246,7 +246,7 @@ While optimized for large displays, the interface includes:
 
 ## 🆕 Version History
 
-### v1.0.0 - Initial Release
+### v1.0.0 — Initial Release
 - Real-time data synchronization
 - Dual leaderboard display
 - Activity feed functionality

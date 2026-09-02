@@ -58,7 +58,7 @@
     --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     
     /* Animation variables for consistency */
-    /* Emil Kowalski easing + duration tokens */
+    /* Standard easing + duration tokens */
     --ease-out:       cubic-bezier(0.23, 1, 0.32, 1);
     --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
     --ease-out-soft:  cubic-bezier(0.33, 1, 0.68, 1);
@@ -921,7 +921,7 @@ body {
 }
 
 /* Reduce motion for users who prefer it — preserve color/opacity crossfades,
-   kill only transforms and infinite animations (per Emil rubric). */
+   kill only transforms and infinite animations (per the design rubric). */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -3865,7 +3865,7 @@ body.menu-open {
 }
 
 /* =========================================================================
-   Emil Kowalski fit-and-finish polish
+   Fit-and-finish polish
    Added by DESIGN_REVIEW.md pass. Append-only; keep diffs readable.
    ========================================================================= */
 
@@ -3944,7 +3944,7 @@ button.icon-btn:active {
 }
 
 /* Transform-origins — popovers/flyouts scale from their trigger edge,
-   not center (Emil rubric). Modals stay centered. */
+   not center (design rubric). Modals stay centered. */
 .hamburger-flyout {
     transform-origin: top right;
 }

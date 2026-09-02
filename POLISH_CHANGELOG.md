@@ -1,6 +1,6 @@
 # Fit-and-Finish Polish — Changelog
 
-Emil Kowalski-style craft pass against `DESIGN_REVIEW.md`. CSS-only. Scope: `styles.css`, `live-display/styles.css` (+ incidental hits to `gamification.css`, `data-viz.css` via bulk `transition: all` cleanup). Admin surfaces explicitly untouched.
+Fit-and-finish craft pass against `DESIGN_REVIEW.md`. CSS-only. Scope: `styles.css`, `live-display/styles.css` (+ incidental hits to `gamification.css`, `data-viz.css` via bulk `transition: all` cleanup). Admin surfaces explicitly untouched.
 
 ## Files changed
 
@@ -20,7 +20,7 @@ Total: **4 CSS files touched, +~298 LOC** (almost entirely net-new tokens, polis
 | Baseline (`fit-and-finish + hamburger + session + full-site`, chromium) | 143 | 0 |
 | After polish | 143 | 0 |
 
-No regressions. One intermediate run had a transient failure on `FAQ modal – modal close button has 40px touch target` (36px read under an aggressive `scale(0.9)` entrance transform on `.modal-content`). Fixed by softening the entrance to `scale(0.96) translateY(-8px); opacity:0` → `scale(1) translateY(0); opacity:1` on `.show` — which is also the Emil Before/After rubric move ("nothing in the real world appears from nothing").
+No regressions. One intermediate run had a transient failure on `FAQ modal – modal close button has 40px touch target` (36px read under an aggressive `scale(0.9)` entrance transform on `.modal-content`). Fixed by softening the entrance to `scale(0.96) translateY(-8px); opacity:0` → `scale(1) translateY(0); opacity:1` on `.show` — which is also the Before/After rubric move ("nothing in the real world appears from nothing").
 
 Snapshot-based specs (`design-audit.spec.ts`, `visual-motion-landscape.spec.ts`) were deliberately skipped per the task brief — they will diff intentionally.
 
@@ -74,7 +74,7 @@ Net: **one** opt-in breathing animation on the kiosk. Previously six always-on i
 
 ## Reduced-motion rewrite
 
-The old `@media (prefers-reduced-motion: reduce)` block (`styles.css:876`) listed 14 selectors and did a blanket `transition: none !important` — which Emil's rubric explicitly calls out as wrong (crossfades still help reduced-motion users). Replaced with the universal preserving block:
+The old `@media (prefers-reduced-motion: reduce)` block (`styles.css:876`) listed 14 selectors and did a blanket `transition: none !important` — which the design rubric explicitly calls out as wrong (crossfades still help reduced-motion users). Replaced with the universal preserving block:
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -113,9 +113,9 @@ The 135° `--ms-blue → --ms-purple` body gradient was the single defining "AI 
 
 ## Transform-origins
 
-- `.hamburger-flyout { transform-origin: top right }` — scales from the hamburger corner, not the viewport center (Emil rubric).
+- `.hamburger-flyout { transform-origin: top right }` — scales from the hamburger corner, not the viewport center (design rubric).
 - `.tooltip, [role="tooltip"] { transform-origin: bottom center }` — tooltips scale from pointer side.
-- Modals intentionally kept centered (Emil rubric: modals stay centered).
+- Modals intentionally kept centered (design rubric: modals stay centered).
 
 ## Skeleton / shimmer helper
 
@@ -140,7 +140,7 @@ Added `.skeleton` class + `@keyframes shimmer` (1400ms, `linear`) with a dark-th
 | 7 | Delete dead `@font-face` | ✅ Removed from `styles.css:9-13` |
 | 8 | Fix `prefers-reduced-motion` blocks | ✅ Rewritten in `styles.css`; new block added in `live-display/styles.css`. `a11y.css` duplicate left alone (it's lower-specificity and harmless; the new rule in `styles.css` wins). |
 | 9 | Gate `backdrop-filter: blur` on `.header` | ⚠️ **Partial** — added `@supports not` fallback, but the JS-driven "scrolled > 8px" class wiring is a JS change and out of scope. |
-| 10 | Kill 600ms UI transitions | ✅ Covered by the bulk replacement — every `transition: all 0.4s/0.6s ...` is now `var(--dur-2)` = 180ms. Remaining 400ms transitions are on modal open only, which is the correct duration per Emil (200–500ms for modals). |
+| 10 | Kill 600ms UI transitions | ✅ Covered by the bulk replacement — every `transition: all 0.4s/0.6s ...` is now `var(--dur-2)` = 180ms. Remaining 400ms transitions are on modal open only, which is the correct duration per the design rubric (200–500ms for modals). |
 | 11 | `text-wrap: balance` on headings | ✅ Done |
 | 12 | Admin dashboard sticky sub-nav | ⛔ **Out of scope** (admin files owned by another agent). |
 | 13 | Mobile header collapse | ⛔ **Deferred** — requires HTML restructuring of the header to move widgets into the hamburger flyout; rubric item was flagged as a structural change, not a polish pass. |

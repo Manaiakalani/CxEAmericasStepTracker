@@ -32,7 +32,7 @@
     --error-color: #ff4757;
     --neutral-pill: #4a5065;
 
-    /* Emil Kowalski easing + duration tokens */
+    /* Standard easing + duration tokens */
     --ease-out:       cubic-bezier(0.23, 1, 0.32, 1);
     --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
     --ease-out-soft:  cubic-bezier(0.33, 1, 0.68, 1);

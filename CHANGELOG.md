@@ -121,7 +121,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Enhanced Favicon**: Multi-format favicon support for all browsers
 
 ### 🔧 Changed
-- **Challenge Refinement**: Updated "Bill Gates Memorial Bridge" to "Seattle Bridge Explorer" for neutrality
+- **Challenge Refinement**: Renamed a person-named challenge to "Seattle Bridge Explorer" for neutrality
 - **UI Polish**: Smaller, refined footer text sizing
 - **Weather Integration**: Confirmed Open-Meteo API implementation with proper fallbacks
 
