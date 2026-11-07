@@ -1,4 +1,4 @@
-# CxE Americas Offsite 2025 — Step Tracker
+# CxE Americas Offsite 2025: Step Tracker
 
 A mobile-first step-tracking web app for the CxE Americas Offsite 2025. Live weather, dark mode, offline support, and team competition, with a Microsoft-inspired visual language.
 
@@ -23,7 +23,7 @@ A mobile-first step-tracking web app for the CxE Americas Offsite 2025. Live wea
 - Supabase PostgreSQL sync across devices, with localStorage fallback
 - Admin SPA at `/admin/dist/` for user management, manual step entry, and diagnostics
 - Open-Meteo weather for Redmond, WA, plus the official CxE Americas 2025 Spotify playlist
-- WCAG 2.1 AA-oriented markup, keyboard shortcuts (`Alt+1`–`4`, `Ctrl/Cmd+D`, `Escape`)
+- WCAG 2.1 AA-oriented markup, keyboard shortcuts (`Alt+1`-`4`, `Ctrl/Cmd+D`, `Escape`)
 
 ## Quick start
 
@@ -40,7 +40,7 @@ A mobile-first step-tracking web app for the CxE Americas Offsite 2025. Live wea
 
 ### Admin
 
-The admin console is a React + shadcn/ui SPA at `/admin/dist/`. The legacy `admin-login.html` and `admin-dashboard.html` pages redirect to it. Authentication uses the Supabase `verify_admin_credentials` RPC — no credentials are embedded in the static HTML. See [`admin/README.md`](admin/README.md) for stack, routes, and build commands.
+The admin console is a React + shadcn/ui SPA at `/admin/dist/`. The legacy `admin-login.html` and `admin-dashboard.html` pages redirect to it. Authentication uses the Supabase `verify_admin_credentials` RPC: no credentials are embedded in the static HTML. See [`admin/README.md`](admin/README.md) for stack, routes, and build commands.
 
 1. Open `/admin/dist/#/login` (or `/admin-login.html`).
 2. Sign in with admin credentials verified against Supabase.
@@ -81,7 +81,7 @@ const SUPABASE_CONFIG = {
 
 ## Version history
 
-Current release: **v2.4.1** — Testing & Polish Edition (23 January 2026). Full notes are in [`CHANGELOG.md`](CHANGELOG.md).
+Current release: **v2.4.1**: Testing & Polish Edition (23 January 2026). Full notes are in [`CHANGELOG.md`](CHANGELOG.md).
 
 | Version | Date | Highlights |
 |---------|------|------------|
