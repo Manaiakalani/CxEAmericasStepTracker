@@ -1,4 +1,4 @@
-# CxE Americas Step Tracker — Admin SPA
+# CxE Americas Step Tracker: Admin SPA
 
 A React + Vite + Tailwind + shadcn/ui single-page application that replaces the
 legacy `admin-dashboard.html` in the parent static site. It is designed to be
@@ -54,7 +54,7 @@ server-side rewrites).
 
 Unauthenticated users are redirected to `#/login` via `RequireAuth`. The admin
 session is stored in `localStorage` (`adminUser` / `adminSession` /
-`adminSessionExpiry`) with a 4-hour TTL — matches the legacy page exactly, so a
+`adminSessionExpiry`) with a 4-hour TTL: matches the legacy page exactly, so a
 session established in the old world still works here (and vice-versa).
 
 ## Architecture
@@ -99,7 +99,7 @@ admin/
    `./admin/dist/#/login` (both via `<meta http-equiv="refresh">` and JS).
 2. `vite.config.ts` sets `base: "/admin/dist/"` so asset URLs inside the built
    `index.html` resolve to `/admin/dist/assets/*` on the parent host.
-3. The bundle uses a **hash router**, so no server rewrites are required — any
+3. The bundle uses a **hash router**, so no server rewrites are required: any
    static host that serves `/admin/dist/index.html` will work.
 4. `admin/dist/` is **committed** to version control so the parent site does
    not need a build step. Re-run `npm run build` whenever you change the SPA.
@@ -120,7 +120,7 @@ shipped in the parent site's `supabase-config.js`.
 
 Applied throughout following the _Design Engineering_ skill:
 
-- `ease-out` transitions (150–260ms) and `cubic-bezier(0.22, 1, 0.36, 1)` fades.
+- `ease-out` transitions (150-260ms) and `cubic-bezier(0.22, 1, 0.36, 1)` fades.
 - `:active { transform: scale(0.97) }` feedback on buttons globally.
 - `text-wrap: balance` on headings; `pretty` on paragraphs.
 - Focus-visible rings with 2px offset ring on the background color.
