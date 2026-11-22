@@ -10,7 +10,16 @@
 
   function sanitizeHTML(str) {
     if (typeof str !== 'string') return '';
-    return str.replace(/<[^>]*>/g, '');
+    // Parse as HTML and read textContent so nested or partial tags cannot
+    // survive a single-pass regex strip (for example "<scr<script>ipt>").
+    const doc = new DOMParser().parseFromString(str, 'text/html');
+    const text = (doc.body && typeof doc.body.textContent === 'string')
+      ? doc.body.textContent
+      : '';
+    // Entity-encoded markup such as "&lt;img ...&gt;" becomes angle brackets
+    // after textContent. Strip leftover < and > so the result cannot become
+    // live HTML when interpolated later.
+    return text.replace(/[<>]/g, '');
   }
 
   function isPositiveInteger(value) {
