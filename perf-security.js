@@ -10,7 +10,10 @@
 
   function sanitizeHTML(str) {
     if (typeof str !== 'string') return '';
-    return str.replace(/<[^>]*>/g, '');
+    // Parse as HTML and read textContent so nested or partial tags cannot
+    // survive a single-pass regex strip (for example "<scr<script>ipt>").
+    const doc = new DOMParser().parseFromString(str, 'text/html');
+    return (doc.body && doc.body.textContent) ? doc.body.textContent : '';
   }
 
   function isPositiveInteger(value) {
